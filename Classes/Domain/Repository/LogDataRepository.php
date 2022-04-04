@@ -2,7 +2,10 @@
 
 namespace Typoheads\Formhandler\Domain\Repository;
 
+use TYPO3\CMS\Extbase\Persistence\Generic\Query;
+use TYPO3\CMS\Extbase\Persistence\QueryInterface;
 use TYPO3\CMS\Extbase\Persistence\Repository;
+use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 use Typoheads\Formhandler\Domain\Model\Demand;
 
 /*
@@ -54,31 +57,45 @@ class LogDataRepository extends Repository
         )->execute();
     }
 
-    public function findDemanded(Demand $demand = null)
+    public function findDemanded(Demand $demand)
+    {
+        $query = $this->getQueryWithConstraints($demand);
+        $query->setLimit($demand->getLimit());
+        $query->setOffset($demand->getOffset());
+
+        return $query->execute();
+
+    }
+
+    protected function getQueryWithConstraints(Demand $demand): QueryInterface
     {
         $query = $this->createQuery();
         $constraints = [$query->equals('deleted', 0)];
 
-        if ($demand !== null) {
-            if ($demand->getPid() > 0) {
-                $constraints[] = $query->equals('pid', $demand->getPid());
-            }
-
-            if (strlen($demand->getIp()) > 0) {
-                $constraints[] = $query->equals('ip', $demand->getIp());
-            }
-
-            if ($demand->getStartTimestamp() > 0) {
-                $constraints[] = $query->greaterThanOrEqual('tstamp', $demand->getStartTimestamp());
-            }
-            if ($demand->getEndTimestamp() > 0) {
-                $constraints[] = $query->lessThan('tstamp', $demand->getEndTimestamp());
-            }
+        if ($demand->getPid() > 0) {
+            $constraints[] = $query->equals('pid', $demand->getPid());
         }
-        if (count($constraints) > 0) {
-            $query->matching($query->logicalAnd($constraints));
-            return $query->execute();
+
+        if (strlen($demand->getIp()) > 0) {
+            $constraints[] = $query->equals('ip', $demand->getIp());
         }
-        return $this->findAll();
+
+        if ($demand->getStartTimestamp() > 0) {
+            $constraints[] = $query->greaterThanOrEqual('tstamp', $demand->getStartTimestamp());
+        }
+        if ($demand->getEndTimestamp() > 0) {
+            $constraints[] = $query->lessThan('tstamp', $demand->getEndTimestamp());
+        }
+
+        $query->matching($query->logicalAnd($constraints));
+
+        return $query;
+    }
+
+
+    public function countRedirectsByByDemand(Demand $demand = null): int
+    {
+        $query = $this->getQueryWithConstraints($demand);
+        return $query->count();
     }
 }

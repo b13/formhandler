@@ -79,6 +79,8 @@ class ModuleController extends ActionController
         $this->utilityFuncs = GeneralUtility::makeInstance(\Typoheads\Formhandler\Utility\GeneralUtility::class);
         $this->pageRenderer = $this->objectManager->get('TYPO3\CMS\Core\Page\PageRenderer');
 
+        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/DateTimePicker');
+
         if (!isset($this->settings['dateFormat'])) {
             $this->settings['dateFormat'] = $GLOBALS['TYPO3_CONF_VARS']['SYS']['USdateFormat'] ? 'm-d-Y' : 'd-m-Y';
         }
@@ -100,27 +102,66 @@ class ModuleController extends ActionController
         //$propertyMappingConfiguration->allowProperties('firstname');
     }
 
+    protected function setStartAndEndTimeFromTimeSelector(Demand $demand)
+    {
+        $startTime = $demand->getManualDateStart() ? $demand->getManualDateStart()->getTimestamp() : 0;
+        $endTime = $demand->getManualDateStop() ? $demand->getManualDateStop()->getTimestamp() : 0;
+        $demand->setStartTimestamp($startTime);
+        $demand->setEndTimestamp($endTime);
+    }
+
+    /**
+     * Prepares information for the pagination of the module
+     */
+    protected function preparePagination(Demand $demand): array
+    {
+        $count = $this->logDataRepository->countRedirectsByByDemand($demand);
+        $numberOfPages = ceil($count / $demand->getLimit());
+        $endRecord = $demand->getOffset() + $demand->getLimit();
+        if ($endRecord > $count) {
+            $endRecord = $count;
+        }
+
+        $pagination = [
+            'count' => $count,
+            'current' => $demand->getPage(),
+            'numberOfPages' => $numberOfPages,
+            'hasLessPages' => $demand->getPage() > 1,
+            'hasMorePages' => $demand->getPage() < $numberOfPages,
+            'startRecord' => $demand->getOffset() + 1,
+            'endRecord' => $endRecord,
+        ];
+        if ($pagination['current'] < $pagination['numberOfPages']) {
+            $pagination['nextPage'] = $pagination['current'] + 1;
+        }
+        if ($pagination['current'] > 1) {
+            $pagination['previousPage'] = $pagination['current'] - 1;
+        }
+        return $pagination;
+    }
+
     /**
      * Displays log data
      */
-    public function indexAction(Demand $demand = null): ResponseInterface
+    public function indexAction(Demand $demand = null, int $page = null): ResponseInterface
     {
         if ($demand === null) {
-            $demand = $this->objectManager->get('Typoheads\Formhandler\Domain\Model\Demand');
+            $demand = GeneralUtility::makeInstance(Demand::class);
             if (!isset($this->gp['demand']['pid'])) {
                 $demand->setPid($this->id);
             }
         }
+        if ($page !== null) {
+            $demand->setPage($page);
+        }
+        $this->setStartAndEndTimeFromTimeSelector($demand);
 
-        //@TODO findDemanded funktioniert nicht, da die Datepicker zunächst gefixt werden müssen
         $logDataRows = $this->logDataRepository->findDemanded($demand);
         $this->view->assign('demand', $demand);
         $this->view->assign('logDataRows', $logDataRows);
         $this->view->assign('settings', $this->settings);
-        if (!isset($this->gp['show'])) {
-            $this->gp['show'] = 10;
-        }
-        $this->view->assign('showItems', $this->gp['show']);
+        $pagination = $this->preparePagination($demand);
+        $this->view->assign('pagination', $pagination);
         $permissions = [];
         $this->view->assign('permissions', $permissions);
         return $this->htmlResponse();

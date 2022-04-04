@@ -19,28 +19,18 @@ use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 /**
  * Demand object for log data
  */
-class Demand extends AbstractEntity
+class Demand
 {
 
     /**
      * @var int
      */
-    protected $crdate = 0;
+    protected $pid = 0;
 
     /**
      * @var string
      */
     protected $ip = '';
-
-    /**
-     * @var string
-     */
-    protected $params = '';
-
-    /**
-     * @var bool
-     */
-    protected $isSpam = 0;
 
     /**
      * Calculated start timestamp
@@ -56,83 +46,178 @@ class Demand extends AbstractEntity
      */
     protected $endTimestamp = 0;
 
-    public function getCrdate()
-    {
-        return $this->crdate;
-    }
 
-    public function setCrdate($crdate)
-    {
-        $this->crdate = (int)$crdate;
-    }
+    /**
+     * Manual date start
+     * @var \DateTime|null
+     */
+    protected $manualDateStart;
 
-    public function getIp()
+    /**
+     * Manual date stop
+     * @var \DateTime|null
+     */
+    protected $manualDateStop;
+
+    protected $page = 1;
+
+    protected $limit = 10;
+
+    /**
+     * @return string|null
+     */
+    public function getIp(): ?string
     {
         return $this->ip;
     }
 
-    public function setIp($ip)
+    /**
+     * @param string $ip
+     * @return void
+     */
+    public function setIp(?string $ip = null)
     {
         $this->ip = $ip;
     }
-
-    public function getParams()
+    
+    /**
+     * @return int
+     */
+    public function getPid(): int
     {
-        return $this->params;
-    }
-
-    public function setParams($params)
-    {
-        $this->params = $params;
-    }
-
-    public function getIsSpam()
-    {
-        return $this->isSpam;
-    }
-
-    public function setIsSpam($isSpam)
-    {
-        $this->isSpam = $isSpam;
+        return $this->pid;
     }
 
     /**
-     * Get calculated start timestamp from query constraints
-     *
+     * @param int $pid
+     * @return void
+     */
+    public function setPid(int $pid): void
+    {
+        $this->pid = $pid;
+    }
+
+    /**
      * @return int
      */
-    public function getStartTimestamp()
+    public function getPage(): int
+    {
+        return $this->page;
+    }
+
+    /**
+     * @param int $page
+     * @return void
+     */
+    public function setPage(int $page): void
+    {
+        $this->page = $page;
+    }
+
+    /**
+     * @return int
+     */
+    public function getLimit(): int
+    {
+        return $this->limit;
+    }
+
+    /**
+     * @param int $limit
+     * @return void
+     */
+    public function setLimit(int $limit): void
+    {
+        $this->limit = $limit;
+    }
+
+    /**
+     * Offset for the current set of records
+     */
+    public function getOffset(): int
+    {
+        return ($this->page - 1) * $this->limit;
+    }
+
+    public function getStartTimestamp(): int
     {
         return $this->startTimestamp;
     }
 
-    /**
-     * Set calculated start timestamp from query constraints
-     *
-     * @param int $timestamp
-     */
-    public function setStartTimestamp($timestamp)
+    public function setStartTimestamp(int $startTimestamp): void
     {
-        $this->startTimestamp = (int)$timestamp;
+        $this->startTimestamp = $startTimestamp;
     }
 
-    /**
-     * Get calculated end timestamp from query constraints
-     *
-     * @return int
-     */
-    public function getEndTimestamp()
+    public function getEndTimestamp(): int
     {
         return $this->endTimestamp;
     }
 
-    /**
-     * Set calculated end timestamp from query constraints
-     *
-     * @param int $timestamp
-     */
-    public function setEndTimestamp($timestamp)
+    public function setEndTimestamp(int $endTimestamp): void
     {
-        $this->endTimestamp = (int)$timestamp;
+        $this->endTimestamp = $endTimestamp;
+    }
+
+
+    public function getParameters(): array
+    {
+        $parameters = [];
+        if ($this->getIp()) {
+            $parameters['ip'] = $this->getIp();
+        }
+        if ($this->getManualDateStop()) {
+            $parameters['manualDateStop'] = $this->getManualDateStop()->format('c');
+        }
+        if ($this->getManualDateStart()) {
+            $parameters['manualDateStart'] = $this->getManualDateStart()->format('c');
+        }
+        if ($this->getPid()) {
+            $parameters['pid'] = $this->getPid();
+        }
+        if ($this->getLimit()) {
+            $parameters['limit'] = $this->getLimit();
+        }
+        return $parameters;
+    }
+
+    /**
+     * Set manual date start
+     *
+     * @param \DateTime $manualDateStart
+     */
+    public function setManualDateStart(\DateTime $manualDateStart = null)
+    {
+        $this->manualDateStart = $manualDateStart;
+    }
+
+    /**
+     * Get manual date start
+     *
+     * @return \DateTime|null
+     */
+    public function getManualDateStart()
+    {
+        return $this->manualDateStart;
+    }
+
+    /**
+     * Set manual date stop
+     *
+     * @param \DateTime $manualDateStop
+     */
+    public function setManualDateStop(\DateTime $manualDateStop = null)
+    {
+        $this->manualDateStop = $manualDateStop;
+    }
+
+    /**
+     * Get manual date stop
+     *
+     * @return \DateTime|null
+     */
+    public function getManualDateStop()
+    {
+        return $this->manualDateStop;
     }
 }

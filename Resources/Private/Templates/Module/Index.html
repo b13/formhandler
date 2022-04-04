@@ -1,9 +1,15 @@
-{namespace fh = Typoheads\Formhandler\ViewHelpers}
+<html
+    xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+    xmlns:fh="http://typo3.org/ns/Typoheads/Formhandler/ViewHelpers"
+    data-namespace-typo3-fluid="true"
+>
+
 <f:layout name="Default" />
+<f:debug>{_all}</f:debug>
 <div class="row">
 	<div class="col-xs-12">
 		<f:section name="headline">
-			<h1><f:translate key="headline.index" /></h1>
+			<h1>x<f:translate key="headline.index" /></h1>
 		</f:section>
 
 		<f:section name="content">
@@ -21,13 +27,16 @@
 						<label for="tx_formhandler_logdata_start"><f:translate key="label.start" /></label>
 						<div class="input-group input-group-sm">
 							<f:form.textfield
-									name="start"
-									value="{f:if(condition: demand.startTimestamp, then: \"{f:format.date(format:'{settings.timeFormat} {settings.dateFormat}', date: '@{demand.startTimestamp}')}\")}"
+									name="manualDateStart"
+									value="{f:if(condition: demand.manualDateStart, then: \"{f:format.date(format:'{settings.timeFormat} {settings.dateFormat}', date: '{demand.manualDateStart}')}\")}"
 									id="tx_formhandler_logdata_start"
 									class="form-control input-sm t3js-datetimepicker t3js-clearable"
 									data="{date-type: 'datetime', date-offset: 0}"
 									/>
-							<f:form.hidden property="startTimestamp" value="{demand.startTimestamp}" />
+							<f:form.hidden
+                                property="manualDateStart"
+                                value="{f:if(condition: demand.manualDateStart, then: \"{f:format.date(format:'c', date: '{demand.manualDateStart}')}\")}"
+                            />
 							<span class="input-group-btn">
 								<label class="btn btn-default" for="tx_formhandler_logdata_start">
 									<span class="fa fa-calendar"></span>
@@ -39,13 +48,16 @@
 						<label for="tx_formhandler_logdata_end"><f:translate key="label.end" /></label>
 						<div class="input-group input-group-sm">
 							<f:form.textfield
-									name="start"
-									value="{f:if(condition: demand.endTimestamp, then: \"{f:format.date(format:'{settings.timeFormat} {settings.dateFormat}', date: '@{demand.endTimestamp}')}\")}"
+									name="manualDateStop"
+									value="{f:if(condition: demand.manualDateStop, then: \"{f:format.date(format:'{settings.timeFormat} {settings.dateFormat}', date: '{demand.manualDateStop}')}\")}"
 									id="tx_formhandler_logdata_end"
 									class="form-control input-sm t3js-datetimepicker t3js-clearable"
 									data="{date-type: 'datetime', date-offset: 0}"
 									/>
-							<f:form.hidden property="endTimestamp" value="{demand.endTimestamp}" />
+							<f:form.hidden
+                                property="manualDateStop"
+                                value="{f:if(condition: demand.manualDateStop, then: \"{f:format.date(format:'c', date: '{demand.manualDateStop}')}\")}"
+                            />
 							<span class="input-group-btn">
 								<label class="btn btn-default" for="tx_formhandler_logdata_end">
 									<span class="fa fa-calendar"></span>
@@ -55,7 +67,7 @@
 					</div>
 					<div class="form-group">
 						<label for="tx_formhandler_logdata_show"><f:translate key="label.show" /></label>
-						<f:form.select id="tx_formhandler_logdata_show" class="form-control" name="show" value="{showItems}" options="{10:10, 50:50, 100:100, 1000:1000, 999999:'All'}"/>
+						<f:form.select id="tx_formhandler_logdata_show" class="form-control" name="show" property="limit" options="{10:10, 50:50, 100:100, 1000:1000, 999999:'All'}"/>
 					</div>
 					<div class="form-group">
 						<f:form.submit value="{f:translate(key: 'label.submit')}" class="btn btn-default btn-sm" />
@@ -112,6 +124,7 @@
 												</f:for>
 										</tbody>
 									</table>
+                                    <f:render partial="Module/Pagination" arguments="{_all}" />
 								</div>
 						</f:then>
 						<f:else>

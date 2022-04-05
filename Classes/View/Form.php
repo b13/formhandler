@@ -406,7 +406,12 @@ class Form extends AbstractView
             unset($parameters['randomID']);
         }
 
-        $path = $this->pi_getPageLink($GLOBALS['TSFE']->id, '', $parameters);
+        try {
+            $path = $this->pi_getPageLink($GLOBALS['TSFE']->id, '', $parameters);
+        } catch (\OutOfRangeException $e) {
+            $path = $this->pi_getPageLink($GLOBALS['TSFE']->id);
+        }
+
         $path = preg_replace('/ADMCMD_[^=]+=[^&]+(&)?/', '', $path);
         $path = htmlspecialchars($path);
         $markers = [];

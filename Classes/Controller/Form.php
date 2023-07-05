@@ -1381,7 +1381,7 @@ class Form extends AbstractController
         foreach ($cssFiles ?? [] as $idx => $fileOptions) {
             $file = $fileOptions['file'];
             if (strlen(trim($file)) > 0) {
-                $file = $this->utilityFuncs->resolveRelPathFromSiteRoot($file);
+                $file = $this->utilityFuncs->resolveRelPath($file);
                 $pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
                 $pageRenderer->addCssFile(
                     $file,
@@ -1406,7 +1406,7 @@ class Form extends AbstractController
         foreach ($jsFiles ?? [] as $idx => $fileOptions) {
             $file = $fileOptions['file'];
             if (strlen(trim($file)) > 0) {
-                $file = $this->utilityFuncs->resolveRelPathFromSiteRoot($file);
+                $file = $this->utilityFuncs->resolveRelPath($file);
                 $pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
                 $pageRenderer->addJsFile(
                     $file,
@@ -1429,7 +1429,7 @@ class Form extends AbstractController
         foreach ($jsFiles ?? [] as $idx => $fileOptions) {
             $file = $fileOptions['file'];
             if (strlen(trim($file)) > 0) {
-                $file = $this->utilityFuncs->resolveRelPathFromSiteRoot($file);
+                $file = $this->utilityFuncs->resolveRelPath($file);
                 $pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
                 $pageRenderer->addJsFooterFile(
                     $file,

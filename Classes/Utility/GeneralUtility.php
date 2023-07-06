@@ -247,7 +247,10 @@ class GeneralUtility implements SingletonInterface
             $message = LocalizationUtility::translate('LLL:' . $langFiles . ':' . $key);
         } else {
             foreach ($langFiles as $idx => $langFile) {
-                $message = LocalizationUtility::translate('LLL:' . $langFile . ':' . $key);
+                $localized = LocalizationUtility::translate('LLL:' . $langFile . ':' . $key);
+                if (trim($localized) !== '') {
+                    $message = $localized;
+                }
             }
         }
         return $message;

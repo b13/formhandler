@@ -2,7 +2,9 @@
 
 namespace Typoheads\Formhandler\Domain\Model;
 
+use TYPO3\CMS\Extbase\Annotation\Validate;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
+use TYPO3\CMS\Extbase\Validation\Validator\NotEmptyValidator;
 
 /*
  * This file is part of the TYPO3 CMS project.
@@ -21,11 +23,10 @@ use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
  */
 class LogData extends AbstractEntity
 {
-
     /**
      * @var int
-     * @TYPO3\CMS\Extbase\Annotation\Validate(validator="TYPO3\CMS\Extbase\Validation\Validator\NotEmptyValidator")
      */
+    #[Validate(['validator' => NotEmptyValidator::class])]
     protected $crdate = 0;
 
     /**
@@ -35,8 +36,8 @@ class LogData extends AbstractEntity
 
     /**
      * @var string
-     * @TYPO3\CMS\Extbase\Annotation\Validate(validator="TYPO3\CMS\Extbase\Validation\Validator\NotEmptyValidator")
      */
+    #[Validate(['validator' => NotEmptyValidator::class])]
     protected $params = '';
 
     /**
@@ -49,7 +50,7 @@ class LogData extends AbstractEntity
         return $this->crdate;
     }
 
-    public function setCrdate($crdate)
+    public function setCrdate($crdate): void
     {
         $this->crdate = (int)$crdate;
     }
@@ -59,7 +60,7 @@ class LogData extends AbstractEntity
         return $this->ip;
     }
 
-    public function setIp($ip)
+    public function setIp($ip): void
     {
         $this->ip = $ip;
     }
@@ -69,7 +70,7 @@ class LogData extends AbstractEntity
         return $this->params;
     }
 
-    public function setParams($params)
+    public function setParams($params): void
     {
         $this->params = $params;
     }
@@ -79,7 +80,7 @@ class LogData extends AbstractEntity
         return $this->isSpam;
     }
 
-    public function setIsSpam($isSpam)
+    public function setIsSpam($isSpam): void
     {
         $this->isSpam = $isSpam;
     }

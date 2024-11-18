@@ -21,7 +21,6 @@ use Typoheads\Formhandler\Component\AbstractComponent;
  */
 abstract class AbstractGenerator extends AbstractComponent
 {
-
     /**
      * Returns the link with the right action set to be used in Finisher_SubmittedOK
      *
@@ -61,7 +60,7 @@ abstract class AbstractGenerator extends AbstractComponent
 
         if (is_array($this->settings['additionalParams.'])) {
             foreach ($this->settings['additionalParams.'] as $param => $value) {
-                if (false === strpos($param, '.')) {
+                if (!str_contains($param, '.')) {
                     if (is_array($this->settings['additionalParams.'][$param . '.'])) {
                         $value = $this->utilityFuncs->getSingle($this->settings['additionalParams.'], $param);
                     }

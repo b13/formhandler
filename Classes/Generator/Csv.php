@@ -18,7 +18,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  *                                                                        */
 class Csv extends AbstractGenerator
 {
-
     /**
      * Renders the CSV.
      *
@@ -28,7 +27,7 @@ class Csv extends AbstractGenerator
     {
         $params = $this->gp;
         $exportParams = $this->utilityFuncs->getSingle($this->settings, 'exportParams');
-        if (!is_array($exportParams) && strpos($exportParams, ',') !== false) {
+        if (!is_array($exportParams) && str_contains($exportParams, ',')) {
             $exportParams = GeneralUtility::trimExplode(',', $exportParams);
         }
 

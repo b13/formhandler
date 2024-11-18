@@ -23,7 +23,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class WebkitPdf extends AbstractGenerator
 {
-
     /**
      * Renders the PDF.
      *
@@ -39,7 +38,7 @@ class WebkitPdf extends AbstractGenerator
                 $linkGP = $this->gp;
             }
 
-            $url = GeneralUtility::getIndpEnv('TYPO3_SITE_URL') . $this->cObj->getTypolink_URL($GLOBALS['TSFE']->id, $linkGP);
+            $url = GeneralUtility::getIndpEnv('TYPO3_SITE_URL') . $this->cObj->createUrl(['parameter' => $GLOBALS['TSFE']->id]);
             if ($this->url) {
                 $url = $this->url;
             }
@@ -94,7 +93,7 @@ class WebkitPdf extends AbstractGenerator
             $params = $this->utilityFuncs->mergeConfiguration($params, $componentParams);
         }
         $text = $this->getLinkText();
-        $this->url = GeneralUtility::getIndpEnv('TYPO3_SITE_URL') . $this->cObj->getTypolink_URL($GLOBALS['TSFE']->id, $params);
+        $this->url = GeneralUtility::getIndpEnv('TYPO3_SITE_URL') . $this->cObj->createUrl(['parameter' => $GLOBALS['TSFE']->id]);
         $params = [
             'tx_webkitpdf_pi1' => [
                 'urls' => [

@@ -22,7 +22,6 @@ use Typoheads\Formhandler\Component\AbstractClass;
  */
 abstract class AbstractController extends AbstractClass
 {
-
     /**
      * The content returned by the controller
      *
@@ -56,7 +55,7 @@ abstract class AbstractController extends AbstractClass
      *
      * @param Content $content
      */
-    public function setContent($content)
+    public function setContent($content): void
     {
         $this->content = $content;
     }
@@ -76,7 +75,7 @@ abstract class AbstractController extends AbstractClass
      *
      * @param string $key
      */
-    public function setPredefined($key)
+    public function setPredefined($key): void
     {
         $this->predefined = $key;
     }
@@ -86,7 +85,7 @@ abstract class AbstractController extends AbstractClass
      *
      * @param array $langFiles
      */
-    public function setLangFiles($langFiles)
+    public function setLangFiles($langFiles): void
     {
         $this->langFiles = $langFiles;
     }
@@ -95,7 +94,7 @@ abstract class AbstractController extends AbstractClass
      * Sets the template file attribute to $template
      * @param string $template
      */
-    public function setTemplateFile($template)
+    public function setTemplateFile($template): void
     {
         $this->templateFile = $template;
     }

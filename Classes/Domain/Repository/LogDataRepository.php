@@ -2,10 +2,10 @@
 
 namespace Typoheads\Formhandler\Domain\Repository;
 
-use TYPO3\CMS\Extbase\Persistence\Generic\Query;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings;
 use TYPO3\CMS\Extbase\Persistence\QueryInterface;
 use TYPO3\CMS\Extbase\Persistence\Repository;
-use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 use Typoheads\Formhandler\Domain\Model\Demand;
 
 /*
@@ -25,14 +25,12 @@ use Typoheads\Formhandler\Domain\Model\Demand;
  */
 class LogDataRepository extends Repository
 {
-
     /**
      * Initializes the repository.
      */
-    public function initializeObject()
+    public function initializeObject(): void
     {
-        /** @var $querySettings \TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings */
-        $querySettings = $this->objectManager->get('TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings');
+        $querySettings = GeneralUtility::makeInstance(Typo3QuerySettings::class);
         $querySettings->setRespectStoragePage(false);
         $this->setDefaultQuerySettings($querySettings);
     }
@@ -92,8 +90,7 @@ class LogDataRepository extends Repository
         return $query;
     }
 
-
-    public function countRedirectsByByDemand(Demand $demand = null): int
+    public function countRedirectsByByDemand(?Demand $demand = null): int
     {
         $query = $this->getQueryWithConstraints($demand);
         return $query->count();

@@ -21,7 +21,6 @@ use TYPO3\CMS\Core\Http\ApplicationType;
  */
 class TemplateTCPDF extends \TCPDF
 {
-
     /**
      * Path to language file
      *
@@ -52,7 +51,7 @@ class TemplateTCPDF extends \TCPDF
     /**
      * Generates the header of the page
      */
-    public function Header()
+    public function Header(): void
     {
         $headerText = $this->getHeaderText();
         if (strlen($headerText) > 0) {
@@ -76,7 +75,7 @@ class TemplateTCPDF extends \TCPDF
     /**
      * Generates the footer
      */
-    public function Footer()
+    public function Footer(): void
     {
 
         //Position at 1.5 cm from bottom
@@ -129,7 +128,7 @@ class TemplateTCPDF extends \TCPDF
      *
      * @param string $s The string to set as PDF Header Text
      */
-    public function setHeaderText($s)
+    public function setHeaderText($s): void
     {
         $this->headerText = $s;
     }
@@ -139,7 +138,7 @@ class TemplateTCPDF extends \TCPDF
      *
      * @param string $s The string to set as PDF Header Text
      */
-    public function setFooterText($s)
+    public function setFooterText($s): void
     {
         $this->footerText = $s;
     }

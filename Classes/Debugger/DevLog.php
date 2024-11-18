@@ -22,11 +22,10 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class DevLog extends AbstractDebugger
 {
-
     /**
      * Inserts the messages to the devlog
      */
-    public function outputDebugLog()
+    public function outputDebugLog(): void
     {
         foreach ($this->debugLog as $section => $logData) {
             foreach ($logData as $messageData) {

@@ -23,7 +23,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class DevLog extends AbstractLogger
 {
-
     /**
      * Logs the given values.
      *

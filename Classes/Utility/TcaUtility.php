@@ -118,7 +118,7 @@ class TcaUtility
             if ((int)$pid < 0) {
                 $conn = GeneralUtility::makeInstance(ConnectionPool::class)
                     ->getConnectionForTable('tt_content');
-                $pid = $conn->select(['pid'], 'tt_content', ['uid' => abs($pid)])->fetchColumn(0);
+                $pid = $conn->select(['pid'], 'tt_content', ['uid' => abs($pid)])->fetchOne(0);
             }
         }
 
@@ -126,7 +126,7 @@ class TcaUtility
         if (!$pid) {
             $conn = GeneralUtility::makeInstance(ConnectionPool::class)
                 ->getConnectionForTable('tt_content');
-            $row = $conn->select(['pid'], 'tt_content', ['uid' => $contentUid])->fetch();
+            $row = $conn->select(['pid'], 'tt_content', ['uid' => $contentUid])->fetchAssociative();
             if ($row) {
                 $pid = $row['pid'];
             }

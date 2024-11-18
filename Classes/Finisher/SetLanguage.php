@@ -21,7 +21,6 @@ namespace Typoheads\Formhandler\Finisher;
  */
 class SetLanguage extends AbstractFinisher
 {
-
     /**
      * The main method called by the controller
      *

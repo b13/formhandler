@@ -4,7 +4,6 @@ namespace Typoheads\Formhandler\Mailer;
 
 interface MailerInterface
 {
-
     /**
      * Sends the email to the given reccipients
      *

@@ -20,6 +20,4 @@ use Typoheads\Formhandler\Component\AbstractComponent;
  * Abstract class for Finisher Classes used by Formhandler
  * @abstract
  */
-abstract class AbstractFinisher extends AbstractComponent
-{
-}
+abstract class AbstractFinisher extends AbstractComponent {}

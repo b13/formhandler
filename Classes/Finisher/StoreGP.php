@@ -25,7 +25,6 @@ namespace Typoheads\Formhandler\Finisher;
  */
 class StoreGP extends AbstractFinisher
 {
-
     /**
      * The main method called by the controller
      *

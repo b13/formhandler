@@ -43,7 +43,6 @@ namespace Typoheads\Formhandler\Interceptor;
  */
 class StdWrap extends AbstractInterceptor
 {
-
     /**
      * Process fields.
      *

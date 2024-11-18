@@ -17,7 +17,7 @@ class StdWrapHook implements ContentObjectStdWrapHookInterface
      *
      * @param string $content Input value undergoing processing in this function. Possibly substituted by other values fetched from another source.
      * @param array $configuration TypoScript stdWrap properties
-     * @param \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer $parentObject Parent content object
+     * @param ContentObjectRenderer $parentObject Parent content object
      * @return string Further processed $content
      */
     public function stdWrapPreProcess($content, array $configuration, ContentObjectRenderer &$parentObject)
@@ -43,7 +43,7 @@ class StdWrapHook implements ContentObjectStdWrapHookInterface
      *
      * @param string $content Input value undergoing processing in this function. Possibly substituted by other values fetched from another source.
      * @param array $configuration TypoScript stdWrap properties
-     * @param \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer $parentObject Parent content object
+     * @param ContentObjectRenderer $parentObject Parent content object
      * @return string Further processed $content
      */
     public function stdWrapOverride($content, array $configuration, ContentObjectRenderer &$parentObject)
@@ -56,7 +56,7 @@ class StdWrapHook implements ContentObjectStdWrapHookInterface
      *
      * @param string $content Input value undergoing processing in this function. Possibly substituted by other values fetched from another source.
      * @param array $configuration TypoScript "stdWrap properties".
-     * @param \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer $parentObject Parent content object
+     * @param ContentObjectRenderer $parentObject Parent content object
      * @return string Further processed $content
      */
     public function stdWrapProcess($content, array $configuration, ContentObjectRenderer &$parentObject)
@@ -69,7 +69,7 @@ class StdWrapHook implements ContentObjectStdWrapHookInterface
      *
      * @param string $content Input value undergoing processing in this function. Possibly substituted by other values fetched from another source.
      * @param array $configuration TypoScript stdWrap properties
-     * @param \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer $parentObject Parent content object
+     * @param ContentObjectRenderer $parentObject Parent content object
      * @return string Further processed $content
      */
     public function stdWrapPostProcess($content, array $configuration, ContentObjectRenderer &$parentObject)

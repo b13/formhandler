@@ -22,7 +22,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class DB extends AbstractLogger
 {
-
     /**
      * Logs the given values.
      *
@@ -88,8 +87,7 @@ class DB extends AbstractLogger
         }
 
         //query the database
-        $conn = GeneralUtility::makeInstance(ConnectionPool::class)
-            ->getConnectionForTable($table);
+        $conn = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table);
 
         $conn->insert($table, $fields);
         $insertedUID = (int)$conn->lastInsertId($table);
@@ -106,9 +104,6 @@ class DB extends AbstractLogger
 
         if ((int)($this->utilityFuncs->getSingle($this->settings, 'nodebug')) !== 1) {
             $this->utilityFuncs->debugMessage('logging', [$table, implode(',', $fields)]);
-            if ($conn->errorInfo()) {
-                $this->utilityFuncs->debugMessage('error', [$conn->errorInfo()], 3);
-            }
         }
 
         return $this->gp;
@@ -117,7 +112,7 @@ class DB extends AbstractLogger
     protected function parseFieldOrder($order, $orderedFields = [])
     {
         foreach ($order as $fieldName) {
-            if (strpos($fieldName, '|') !== false) {
+            if (str_contains($fieldName, '|')) {
                 $parts = explode('|', $fieldName);
                 $orderedFields = $this->createDeep($orderedFields, $parts);
             } else {

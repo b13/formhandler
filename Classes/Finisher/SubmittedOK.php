@@ -34,7 +34,6 @@ namespace Typoheads\Formhandler\Finisher;
  */
 class SubmittedOK extends AbstractFinisher
 {
-
     /**
      * The main method called by the controller
      *

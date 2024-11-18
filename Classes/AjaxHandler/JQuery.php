@@ -3,7 +3,6 @@
 namespace Typoheads\Formhandler\AjaxHandler;
 
 use TYPO3\CMS\Core\Context\Context;
-use TYPO3\CMS\Core\Http\Request;
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
@@ -35,9 +34,9 @@ class JQuery extends AbstractAjaxHandler
      * @var array
      */
     protected $templates = [
-        'spanLoading'=>'<span class="loading" id="loading_%s" style="display:none">%s</span>',
-        'spanResult'=>'<span id="result_%s" class="formhandler-ajax-validation-result">%s</span>',
-        'aRemoveLink'=>'<a class="formhandler_removelink" href="%s">%s</a>',
+        'spanLoading' => '<span class="loading" id="loading_%s" style="display:none">%s</span>',
+        'spanResult' => '<span id="result_%s" class="formhandler-ajax-validation-result">%s</span>',
+        'aRemoveLink' => '<a class="formhandler_removelink" href="%s">%s</a>',
     ];
 
     /**
@@ -50,7 +49,7 @@ class JQuery extends AbstractAjaxHandler
     /**
      * Initialize AJAX stuff
      */
-    public function initAjax()
+    public function initAjax(): void
     {
         $this->validationStatusClasses = [
             'base' => 'formhandler-validation-status',
@@ -116,14 +115,14 @@ class JQuery extends AbstractAjaxHandler
      *
      * @param array &$markers Reference to the marker array
      */
-    public function fillAjaxMarkers(&$markers)
+    public function fillAjaxMarkers(&$markers): void
     {
         $settings = $this->globals->getSession()->get('settings');
         $ajaxSubmit = $this->utilityFuncs->getSingle($settings['ajax.']['config.'], 'ajaxSubmit');
         if ((int)$ajaxSubmit === 1) {
             $ajaxSubmitLoader = (string)$this->utilityFuncs->getSingle($settings['ajax.']['config.'], 'ajaxSubmitLoader');
             if (strlen($ajaxSubmitLoader) === 0) {
-                $loadingImg =PathUtility::getAbsoluteWebPath(ExtensionManagementUtility::extPath('formhandler')) . 'Resources/Public/Images/ajax-loader.gif';
+                $loadingImg = PathUtility::getAbsoluteWebPath(ExtensionManagementUtility::extPath('formhandler')) . 'Resources/Public/Images/ajax-loader.gif';
                 $loadingImg = '<img src="' . $loadingImg . '" alt="loading" />';
                 $loadingImg = str_replace('../', '', $loadingImg);
                 $ajaxSubmitLoader = '<span class="loading_ajax-submit">' . $loadingImg . '</span>';
@@ -140,7 +139,7 @@ class JQuery extends AbstractAjaxHandler
 
         $loadingImg = (string)$this->utilityFuncs->getSingle($settings['ajax.']['config.'], 'loading');
         if (strlen($loadingImg) === 0) {
-            $loadingImg =PathUtility::getAbsoluteWebPath(ExtensionManagementUtility::extPath('formhandler')) . 'Resources/Public/Images/ajax-loader.gif';
+            $loadingImg = PathUtility::getAbsoluteWebPath(ExtensionManagementUtility::extPath('formhandler')) . 'Resources/Public/Images/ajax-loader.gif';
             $loadingImg = str_replace('../', '', $loadingImg);
             $loadingImg = '<img src="' . $loadingImg . '" alt="loading" />';
         }
@@ -213,7 +212,7 @@ class JQuery extends AbstractAjaxHandler
         /** @var SiteLanguage $siteLanguage */
         $siteLanguage = $request->getAttribute('language');
         $router = $site->getRouter();
-        $uri = $router->generateUri($GLOBALS['TSFE']->id, ['_language' => $siteLanguage,  AjaxValidate::NAMESPACE => 1]);
+        $uri = $router->generateUri($GLOBALS['TSFE']->id, ['_language' => $siteLanguage, AjaxValidate::NAMESPACE => 1]);
         return '(function( $ ) {
                     $(function() {
                         $("' . $formSelector . '").formhandler({

@@ -21,7 +21,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class DateRange extends Date
 {
-    public function init($gp, $settings)
+    public function init($gp, $settings): void
     {
         parent::init($gp, $settings);
         $this->mandatoryParameters = ['min', 'max', 'pattern'];

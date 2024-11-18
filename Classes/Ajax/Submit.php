@@ -32,7 +32,7 @@ class Submit
     private $settings;
 
     /**
-     * @var \Typoheads\Formhandler\Component\Manager
+     * @var Manager
      */
     private $componentManager;
 
@@ -41,11 +41,11 @@ class Submit
      *
      * @return string The HTML list of remaining files to be displayed in the form
      */
-    public function main()
+    public function main(): void
     {
         $this->init();
 
-        $settings = $GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_formhandler_pi1.'];
+        $settings = $GLOBALS['TYPO3_REQUEST']->getAttribute('frontend.typoscript')->getSetupArray()['plugin.']['tx_formhandler_pi1.'];
         $settings['usePredef'] = Globals::getSession()->get('predef');
 
         $content = $GLOBALS['TSFE']->cObj->cObjGetSingle('USER', $settings);
@@ -81,11 +81,11 @@ class Submit
         }
 
         Globals::setCObj($GLOBALS['TSFE']->cObj);
-        $randomID = htmlspecialchars(GeneralUtility::_GP('randomID'));
+        $randomID = htmlspecialchars($GLOBALS['TYPO3_REQUEST']->getParsedBody()['randomID'] ?? $GLOBALS['TYPO3_REQUEST']->getQueryParams()['randomID'] ?? null);
         Globals::setRandomID($randomID);
         Globals::setAjaxMode(true);
         if (!Globals::getSession()) {
-            $ts = $GLOBALS['TSFE']->tmpl->setup['plugin.']['Tx_Formhandler.']['settings.'];
+            $ts = $GLOBALS['TYPO3_REQUEST']->getAttribute('frontend.typoscript')->getSetupArray()['plugin.']['Tx_Formhandler.']['settings.'];
             $sessionClass = \Typoheads\Formhandler\Utility\GeneralUtility::getPreparedClassName($ts['session.'], 'Session\PHP');
             Globals::setSession($this->componentManager->getComponent($sessionClass));
         }

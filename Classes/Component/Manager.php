@@ -4,7 +4,6 @@ namespace Typoheads\Formhandler\Component;
 
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Object\ObjectManager;
 use Typoheads\Formhandler\Utility\Globals;
 
 /*                                                                        *
@@ -29,11 +28,10 @@ use Typoheads\Formhandler\Utility\Globals;
  */
 class Manager implements SingletonInterface
 {
-
     /**
      * The global Formhandler values
      *
-     * @var \Typoheads\Formhandler\Utility\Globals
+     * @var Globals
      */
     protected $globals;
 
@@ -58,19 +56,15 @@ class Manager implements SingletonInterface
      * @author Robert Lemke <robert@typo3.org>
      * @author adapted for TYPO3v4 by Jochen Rau <jochen.rau@typoplanet.de>
      */
-    public function getComponent($componentName)
+    public function getComponent(string $componentName)
     {
         $componentName = $this->utilityFuncs->prepareClassName($componentName);
         //Avoid component manager creating multiple instances of itself
-        if (get_class($this) === $componentName) {
+        if (static::class === $componentName) {
             return $this;
         }
         $arguments = array_slice(func_get_args(), 1, null, true);
 
-        /** @var $objectManager \TYPO3\CMS\Extbase\Object\ObjectManager */
-        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
-        $componentObject = $objectManager->get($componentName, $arguments);
-
-        return $componentObject;
+        return GeneralUtility::makeInstance($componentName, $arguments);
     }
 }

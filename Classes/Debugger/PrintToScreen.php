@@ -21,11 +21,10 @@ use TYPO3\CMS\Core\Utility\DebugUtility;
  */
 class PrintToScreen extends AbstractDebugger
 {
-
     /**
      * Prints the messages to the screen
      */
-    public function outputDebugLog()
+    public function outputDebugLog(): void
     {
         $out = '';
         if (!$this->globals->isAjaxMode()) {
@@ -50,7 +49,7 @@ class PrintToScreen extends AbstractDebugger
     /**
      * Sets default config for the debugger.
      */
-    public function validateConfig()
+    public function validateConfig(): void
     {
         if (!isset($this->settings['sectionWrap']) || !$this->settings['sectionWrap']) {
             $this->settings['sectionWrap'] = '<div style="border:1px solid #ccc; padding:7px; background:#dedede;">|</div>';
@@ -65,7 +64,7 @@ class PrintToScreen extends AbstractDebugger
         $this->settings['severityWrap'] = [
             '1' => '<span style="color:#000;">|</span>',
             '2' => '<span style="color:#FF8C00;">|</span>',
-            '3' => '<span style="color:#FF8C00;">|</span>'
+            '3' => '<span style="color:#FF8C00;">|</span>',
         ];
 
     }

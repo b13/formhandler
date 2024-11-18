@@ -23,7 +23,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class GenerateAuthCode extends AbstractFinisher
 {
-
     /**
      * The main method called by the controller
      *
@@ -66,7 +65,7 @@ class GenerateAuthCode extends AbstractFinisher
             if ($this->settings['selectFields']) {
                 $selectFields = $this->utilityFuncs->getSingle($this->settings, 'selectFields');
             }
-            $row = $conn->select(explode(',', $selectFields), $table, [$uidField => $uid])->fetch();
+            $row = $conn->select(explode(',', $selectFields), $table, [$uidField => $uid])->fetchAssociative();
             if (!empty($row)) {
                 $authCode = $this->generateAuthCode($row);
                 $this->gp['generated_authCode'] = $authCode;

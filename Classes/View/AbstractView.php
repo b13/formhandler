@@ -3,6 +3,7 @@
 namespace Typoheads\Formhandler\View;
 
 use TYPO3\CMS\Core\Service\MarkerBasedTemplateService;
+use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 use TYPO3\CMS\Frontend\Plugin\AbstractPlugin;
 use Typoheads\Formhandler\Component\Manager;
 use Typoheads\Formhandler\Controller\Configuration;
@@ -27,7 +28,6 @@ use Typoheads\Formhandler\Utility\Globals;
  */
 abstract class AbstractView extends AbstractPlugin
 {
-
     /**
      * The prefix id
      *
@@ -42,15 +42,10 @@ abstract class AbstractView extends AbstractPlugin
      */
     public $extKey = 'formhandler';
 
-    /**
-     * The cObj for link generation in FE
-     *
-     * @var tslib_cObj
-     */
-    public $cObj;
+    protected ?ContentObjectRenderer $cObj = null;
 
     /**
-     * @var \TYPO3\CMS\Core\Service\MarkerBasedTemplateService
+     * @var MarkerBasedTemplateService
      */
     protected $markerBasedTemplateService;
 
@@ -61,33 +56,10 @@ abstract class AbstractView extends AbstractPlugin
      */
     public $piVars;
 
-    /**
-     * The Formhandler component manager
-     *
-     * @var \Typoheads\Formhandler\Component\Manager
-     */
-    protected $componentManager;
-
-    /**
-     * The global Formhandler configuration
-     *
-     * @var \Typoheads\Formhandler\Controller\Configuration
-     */
-    protected $configuration;
-
-    /**
-     * The global Formhandler values
-     *
-     * @var \Typoheads\Formhandler\Utility\Globals
-     */
-    protected $globals;
-
-    /**
-     * The Formhandler utility methods
-     *
-     * @var \Typoheads\Formhandler\Utility\GeneralUtility
-     */
-    protected $utilityFuncs;
+    protected Manager $componentManager;
+    protected Configuration $configuration;
+    protected Globals $globals;
+    protected GeneralUtility $utilityFuncs;
 
     /**
      * The model of the view
@@ -126,23 +98,13 @@ abstract class AbstractView extends AbstractPlugin
 
     protected $componentSettings;
 
-    /**
-     * The constructor for a view setting the component manager and the configuration.
-     *
-     * @param \Typoheads\Formhandler\Component\Manager $componentManager
-     * @param \Typoheads\Formhandler\Controller\Configuration $configuration
-     */
     public function __construct(
-        Manager $componentManager,
-        Configuration $configuration,
-        Globals $globals,
-        GeneralUtility $utilityFuncs
     ) {
         parent::__construct();
-        $this->componentManager = $componentManager;
-        $this->configuration = $configuration;
-        $this->globals = $globals;
-        $this->utilityFuncs = $utilityFuncs;
+        $this->componentManager = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(Manager::class);
+        $this->configuration = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(Configuration::class);
+        $this->globals = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(Globals::class);
+        $this->utilityFuncs = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(GeneralUtility::class);
         $this->cObj = $this->globals->getCObj();
         $this->markerBasedTemplateService = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(MarkerBasedTemplateService::class);
         $this->pi_loadLL();
@@ -154,7 +116,7 @@ abstract class AbstractView extends AbstractPlugin
      *
      * @param array $langFiles The files array
      */
-    public function setLangFiles($langFiles)
+    public function setLangFiles($langFiles): void
     {
         $this->langFiles = $langFiles;
     }
@@ -164,12 +126,12 @@ abstract class AbstractView extends AbstractPlugin
      *
      * @param string $settings The settings
      */
-    public function setSettings($settings)
+    public function setSettings($settings): void
     {
         $this->settings = $settings;
     }
 
-    public function setComponentSettings($settings)
+    public function setComponentSettings($settings): void
     {
         $this->componentSettings = $settings;
     }
@@ -187,7 +149,7 @@ abstract class AbstractView extends AbstractPlugin
      *
      * @param string $key The key of the predefined form
      */
-    public function setPredefined($key)
+    public function setPredefined($key): void
     {
         $this->predefined = $key;
     }
@@ -197,7 +159,7 @@ abstract class AbstractView extends AbstractPlugin
      *
      * @param misc $model
      */
-    public function setModel($model)
+    public function setModel($model): void
     {
         $this->model = $model;
     }
@@ -219,7 +181,7 @@ abstract class AbstractView extends AbstractPlugin
      * @param string $templateName Name of a subpart containing the template code to work with
      * @param bool $forceTemplate Not needed
      */
-    public function setTemplate($templateCode, $templateName, $forceTemplate = false)
+    public function setTemplate($templateCode, $templateName, $forceTemplate = false): void
     {
         $this->subparts['template'] = $this->markerBasedTemplateService->getSubpart($templateCode, '###TEMPLATE_' . $templateName . '###');
         $this->subparts['item'] = $this->markerBasedTemplateService->getSubpart($this->subparts['template'], '###ITEM###');
@@ -250,9 +212,7 @@ abstract class AbstractView extends AbstractPlugin
      *
      * @author Jochen Rau
      */
-    protected function initializeView()
-    {
-    }
+    protected function initializeView() {}
 
     /**
      * Returns given string in uppercase

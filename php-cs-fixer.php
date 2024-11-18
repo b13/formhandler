@@ -1,4 +1,8 @@
 <?php
+
+use PhpCsFixer\Config;
+use PhpCsFixer\Finder;
+
 /**
  * This file represents the configuration for Code Sniffing PSR-2-related
  * automatic checks of coding guidelines
@@ -21,7 +25,7 @@ if (PHP_SAPI !== 'cli') {
 }
 // Define in which folders to search and which folders to exclude
 // Exclude all files and directories from .gitignore
-$finder = (new PhpCsFixer\Finder())
+$finder = (new Finder())
     ->ignoreVCSIgnored(true)
     ->in(__DIR__);
 // Return a Code Sniffing configuration using
@@ -33,7 +37,7 @@ $finder = (new PhpCsFixer\Finder())
 //  - Remove unused use statements in the PHP source code
 //  - Ensure Concatenation to have at least one whitespace around
 //  - Remove trailing whitespace at the end of blank lines.
-return (new \PhpCsFixer\Config())
+return (new Config())
     ->setRiskyAllowed(true)
     ->setRules([
         '@DoctrineAnnotation' => true,

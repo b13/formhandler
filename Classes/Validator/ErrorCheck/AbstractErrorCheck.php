@@ -24,11 +24,9 @@ abstract class AbstractErrorCheck extends AbstractComponent
     protected $formFieldName;
     protected $mandatoryParameters = [];
 
-    public function process()
-    {
-    }
+    public function process() {}
 
-    public function setFormFieldName($name)
+    public function setFormFieldName($name): void
     {
         $this->formFieldName = $name;
     }
@@ -48,7 +46,7 @@ abstract class AbstractErrorCheck extends AbstractComponent
      */
     protected function getCheckFailed()
     {
-        $parts = explode('\\', get_class($this));
+        $parts = explode('\\', static::class);
         $checkFailed = lcfirst(array_pop($parts));
         if (is_array($this->settings['params'] ?? null)) {
             $checkFailed .= ';';

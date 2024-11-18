@@ -64,7 +64,7 @@ class LoadDefaultValues extends AbstractPreProcessor
      *
      * @param array $settings
      */
-    public function loadDefaultValuesToGP($settings)
+    public function loadDefaultValuesToGP($settings): void
     {
         if (is_array($settings)) {
             $this->setDefaultValues($settings, $this->gp);
@@ -77,7 +77,7 @@ class LoadDefaultValues extends AbstractPreProcessor
      * @param array $settings
      * @param int $step
      */
-    private function loadDefaultValuesToSession($settings, $step)
+    private function loadDefaultValuesToSession($settings, $step): void
     {
         if (is_array($settings) && $step) {
             $values = $this->globals->getSession()->get('values');

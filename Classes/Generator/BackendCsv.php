@@ -23,7 +23,6 @@ use Typoheads\Formhandler\Component\AbstractComponent;
  */
 class BackendCsv extends AbstractComponent
 {
-
     /**
      * The internal CSV object
      *
@@ -31,7 +30,7 @@ class BackendCsv extends AbstractComponent
      */
     protected $csv;
 
-    public function init($gp, $settings)
+    public function init($gp, $settings): void
     {
         parent::init($gp, $settings);
         $fileName = $this->utilityFuncs->getSingle($this->settings, 'fileName');
@@ -66,7 +65,7 @@ class BackendCsv extends AbstractComponent
      * @param array $exportParams A list of fields to export. If not set all fields are exported
      * @see Tx_Formhandler_Controller_Backend::generateCSV()
      */
-    public function process()
+    public function process(): void
     {
         $records = $this->settings['records'];
         $exportParams = $this->settings['exportFields'];

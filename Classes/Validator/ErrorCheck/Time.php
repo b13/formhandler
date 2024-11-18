@@ -21,7 +21,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class Time extends AbstractErrorCheck
 {
-    public function init($gp, $settings)
+    public function init($gp, $settings): void
     {
         parent::init($gp, $settings);
         $this->mandatoryParameters = ['pattern'];

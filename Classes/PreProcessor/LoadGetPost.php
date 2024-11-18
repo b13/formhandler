@@ -2,8 +2,6 @@
 
 namespace Typoheads\Formhandler\PreProcessor;
 
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-
 /*                                                                        *
  * This script is part of the TYPO3 project - inspiring people to share!  *
  *                                                                        *
@@ -21,7 +19,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class LoadGetPost extends AbstractPreProcessor
 {
-
     /**
      * Main method called by the controller.
      *
@@ -41,7 +38,7 @@ class LoadGetPost extends AbstractPreProcessor
      */
     protected function loadGP()
     {
-        $gp = array_merge(GeneralUtility::_GET(), GeneralUtility::_POST());
+        $gp = array_merge($GLOBALS['TYPO3_REQUEST']->getQueryParams(), $GLOBALS['TYPO3_REQUEST']->getParsedBody());
         $formValuesPrefix = $this->globals->getFormValuesPrefix();
         if ($formValuesPrefix) {
             $gp = $gp[$formValuesPrefix];

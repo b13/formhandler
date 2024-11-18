@@ -21,7 +21,6 @@ namespace Typoheads\Formhandler\Finisher;
  */
 class RestoreLanguage extends AbstractFinisher
 {
-
     /**
      * The main method called by the controller
      *

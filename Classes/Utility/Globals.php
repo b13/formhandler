@@ -38,7 +38,7 @@ class Globals implements SingletonInterface
     protected static $templateCode;
     protected static $templateSuffix;
 
-    public static function setAjaxMode($mode)
+    public static function setAjaxMode($mode): void
     {
         self::$ajaxMode = $mode;
     }
@@ -48,22 +48,22 @@ class Globals implements SingletonInterface
         return self::$ajaxMode;
     }
 
-    public static function setAjaxHandler($ajaxHandler)
+    public static function setAjaxHandler($ajaxHandler): void
     {
         self::$ajaxHandler = $ajaxHandler;
     }
 
-    public static function setCObj($cObj)
+    public static function setCObj($cObj): void
     {
         self::$cObj = $cObj;
     }
 
-    public static function setDebuggers($debuggers)
+    public static function setDebuggers($debuggers): void
     {
         self::$debuggers = $debuggers;
     }
 
-    public static function addDebugger($debugger)
+    public static function addDebugger($debugger): void
     {
         if (!is_array(self::$debuggers)) {
             self::$debuggers = [];
@@ -71,62 +71,62 @@ class Globals implements SingletonInterface
         self::$debuggers[] = $debugger;
     }
 
-    public static function setFormID($formID)
+    public static function setFormID($formID): void
     {
         self::$formID = $formID;
     }
 
-    public static function setFormValuesPrefix($formValuesPrefix)
+    public static function setFormValuesPrefix($formValuesPrefix): void
     {
         self::$formValuesPrefix = $formValuesPrefix;
     }
 
-    public static function setGP($gp)
+    public static function setGP($gp): void
     {
         self::$gp = $gp;
     }
 
-    public static function setLangFiles($langFiles)
+    public static function setLangFiles($langFiles): void
     {
         self::$langFiles = $langFiles;
     }
 
-    public static function setOverrideSettings($overrideSettings)
+    public static function setOverrideSettings($overrideSettings): void
     {
         self::$overrideSettings = $overrideSettings;
     }
 
-    public static function setPredef($predef)
+    public static function setPredef($predef): void
     {
         self::$predef = $predef;
     }
 
-    public static function setRandomID($randomID)
+    public static function setRandomID($randomID): void
     {
         self::$randomID = $randomID;
     }
 
-    public static function setSession($session)
+    public static function setSession($session): void
     {
         self::$session = $session;
     }
 
-    public static function setSettings($settings)
+    public static function setSettings($settings): void
     {
         self::$settings = $settings;
     }
 
-    public static function setSubmitted($submitted)
+    public static function setSubmitted($submitted): void
     {
         self::$submitted = $submitted;
     }
 
-    public static function setTemplateCode($templateCode)
+    public static function setTemplateCode($templateCode): void
     {
         self::$templateCode = $templateCode;
     }
 
-    public static function setTemplateSuffix($templateSuffix)
+    public static function setTemplateSuffix($templateSuffix): void
     {
         self::$templateSuffix = $templateSuffix;
     }

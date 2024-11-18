@@ -34,7 +34,6 @@ namespace Typoheads\Formhandler\Interceptor;
  */
 class AntiSpamFormTime extends AbstractInterceptor
 {
-
     /**
      * The main method called by the controller
      *

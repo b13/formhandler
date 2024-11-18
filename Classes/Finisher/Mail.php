@@ -68,7 +68,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class Mail extends AbstractFinisher
 {
-
     /**
      * The main method called by the controller
      *
@@ -319,7 +318,7 @@ class Mail extends AbstractFinisher
         //send e-mails
         $recipients = $mailSettings['to_email'] ?? [];
         foreach ($recipients as $key => $recipient) {
-            if (strpos($recipient, '@') === false || strpos($recipient, '@') === 0 || strlen(trim($recipient)) === 0) {
+            if (!str_contains($recipient, '@')   || str_starts_with($recipient, '@')   || strlen(trim($recipient)) === 0) {
                 unset($recipients[$key]);
             }
         }
@@ -479,7 +478,7 @@ class Mail extends AbstractFinisher
         $cids = [];
         if (isset($settings['embedFiles.']) && is_array($settings['embedFiles.'])) {
             foreach ($settings['embedFiles.'] as $key => $embedFileSettings) {
-                if (strpos($key, '.') === false) {
+                if (!str_contains($key, '.')) {
                     $embedFile = $this->utilityFuncs->getSingle($settings['embedFiles.'], $key);
                     if (strlen($embedFile) > 0) {
                         if (!strstr($embedFile, $this->utilityFuncs->getDocumentRoot())) {
@@ -531,7 +530,7 @@ class Mail extends AbstractFinisher
      * @param array The GET/POST values
      * @param array The TypoScript configuration
      */
-    public function init($gp, $tsConfig)
+    public function init($gp, $tsConfig): void
     {
         $this->gp = $gp;
         $this->settings = $tsConfig;

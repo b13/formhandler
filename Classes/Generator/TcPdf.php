@@ -19,7 +19,6 @@ namespace Typoheads\Formhandler\Generator;
  */
 class TcPdf extends AbstractGenerator
 {
-
     /**
      * @return mixed
      */

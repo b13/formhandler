@@ -19,11 +19,10 @@ namespace Typoheads\Formhandler\Session;
  */
 class TYPO3 extends AbstractSession
 {
-
     /* (non-PHPdoc)
      * @see Classes/Session/Tx_Formhandler_AbstractSession#set()
     */
-    public function set($key, $value)
+    public function set($key, $value): void
     {
         $data = $GLOBALS['TSFE']->fe_user->getKey('ses', 'formhandler');
         if (!is_array($data[$this->globals->getRandomID()])) {
@@ -37,7 +36,7 @@ class TYPO3 extends AbstractSession
     /* (non-PHPdoc)
      * @see Classes/Session/Tx_Formhandler_AbstractSession#setMultiple()
     */
-    public function setMultiple($values)
+    public function setMultiple($values): void
     {
         if (is_array($values) && !empty($values)) {
             $data = $GLOBALS['TSFE']->fe_user->getKey('ses', 'formhandler');
@@ -78,7 +77,7 @@ class TYPO3 extends AbstractSession
     /* (non-PHPdoc)
      * @see Classes/Session/Tx_Formhandler_AbstractSession#reset()
     */
-    public function reset()
+    public function reset(): void
     {
         $data = $GLOBALS['TSFE']->fe_user->getKey('ses', 'formhandler');
         unset($data[$this->globals->getRandomID()]);
@@ -86,7 +85,7 @@ class TYPO3 extends AbstractSession
         $GLOBALS['TSFE']->fe_user->storeSessionData();
     }
 
-    public function init($gp, $settings)
+    public function init($gp, $settings): void
     {
         parent::init($gp, $settings);
 

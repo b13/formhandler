@@ -21,7 +21,6 @@ use Typoheads\Formhandler\Component\AbstractClass;
  */
 abstract class AbstractSession extends AbstractClass
 {
-
     /**
      * An indicator if a session was already started
      *
@@ -32,7 +31,7 @@ abstract class AbstractSession extends AbstractClass
     /**
      * Starts a new session
      */
-    public function start()
+    public function start(): void
     {
         if ((int)($this->utilityFuncs->getSingle($this->settings, 'disableCookies')) === 1) {
             ini_set('session.use_only_cookies', 'off');
@@ -101,7 +100,7 @@ abstract class AbstractSession extends AbstractClass
      * @param array $gp GET and POST variable array
      * @param array $settings Typoscript configuration for the component (component.1.config.*)
      */
-    public function init($gp, $settings)
+    public function init($gp, $settings): void
     {
         $this->gp = $gp;
         $this->settings = $settings;

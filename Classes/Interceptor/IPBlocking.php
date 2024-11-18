@@ -49,7 +49,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class IPBlocking extends AbstractInterceptor
 {
-
     /**
      * The table where the form submissions are logged
      *
@@ -91,7 +90,7 @@ class IPBlocking extends AbstractInterceptor
      * @param int maximum amount of submissions in given time base.
      * @param bool add IP address to where clause
      */
-    private function check($value, $unit, $maxValue, $addIPToWhere = true)
+    private function check($value, $unit, $maxValue, $addIPToWhere = true): void
     {
         $timestamp = $this->utilityFuncs->getTimestamp($value, $unit);
 
@@ -159,7 +158,7 @@ class IPBlocking extends AbstractInterceptor
             if ($this->settings['redirectPage']) {
                 $this->utilityFuncs->doRedirectBasedOnSettings($this->settings, $this->gp);
             } else {
-                throw new \Exception($message);
+                throw new \Exception($message, 3491278514);
             }
         }
     }
@@ -170,7 +169,7 @@ class IPBlocking extends AbstractInterceptor
      * @param string (ip|global) Defines the message sent
      * @param array The select rows of log table
      */
-    private function sendReport($type, $rows)
+    private function sendReport($type, $rows): void
     {
         $email = $this->utilityFuncs->getSingle($this->settings['report.'], 'email');
         $email = GeneralUtility::trimExplode(',', $email);

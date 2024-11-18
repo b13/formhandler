@@ -29,7 +29,7 @@ abstract class AbstractDebugger extends AbstractComponent
      *
      * @return array The probably modified GET/POST parameters
      */
-    public function process()
+    public function process(): void
     {
         //Not available for this type of component
     }
@@ -41,7 +41,7 @@ abstract class AbstractDebugger extends AbstractComponent
      * @param int $severity The severity of the message (1,2,3)
      * @param array $data Additional data to log
      */
-    public function addToDebugLog($message = '', $severity = 1, array $data = [])
+    public function addToDebugLog($message = '', $severity = 1, array $data = []): void
     {
         $trace = debug_backtrace();
         $section = '';

@@ -61,7 +61,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class DB extends AbstractFinisher
 {
-
     /**
      * The name of the table to put the values into.
      *
@@ -248,7 +247,7 @@ class DB extends AbstractFinisher
     /**
      * Inits the finisher mapping settings values to internal attributes.
      */
-    public function init($gp, $settings)
+    public function init($gp, $settings): void
     {
         parent::init($gp, $settings);
 

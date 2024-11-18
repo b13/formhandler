@@ -36,7 +36,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class AutoDB extends DB
 {
-
     /**
      * The name of the table to put the values into.
      * @todo Make it protected var in Tx_Formhandler_AbstractFinisher
@@ -55,7 +54,7 @@ class AutoDB extends DB
      * @param array $gp
      * @param array $settings
      */
-    public function init($gp, $settings)
+    public function init($gp, $settings): void
     {
         if (!is_array($settings['fields.'])) {
             $settings['fields.'] = [];

@@ -12,6 +12,7 @@ use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
+use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
 /*                                                                        *
  * This script is part of the TYPO3 project - inspiring people to share!  *
@@ -30,7 +31,6 @@ use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
  */
 class GeneralUtility implements SingletonInterface
 {
-
     /**
      * Returns the absolute path to the document root
      *
@@ -43,7 +43,7 @@ class GeneralUtility implements SingletonInterface
 
     public static function getMergedGP()
     {
-        $gp = array_merge(\TYPO3\CMS\Core\Utility\GeneralUtility::_GET(), \TYPO3\CMS\Core\Utility\GeneralUtility::_POST());
+        $gp = array_merge($GLOBALS['TYPO3_REQUEST']->getQueryParams(), $GLOBALS['TYPO3_REQUEST']->getParsedBody() ?? []);
         $prefix = Globals::getFormValuesPrefix();
         if ($prefix) {
             if (isset($gp[$prefix]) && is_array($gp[$prefix])) {
@@ -224,7 +224,7 @@ class GeneralUtility implements SingletonInterface
                 array_push($langFiles, self::getSingle($settings, 'langFile'));
             } elseif (isset($settings['langFile.']) && is_array($settings['langFile.'])) {
                 foreach ($settings['langFile.'] as $key => $langFile) {
-                    if (false === strpos($key, '.')) {
+                    if (!str_contains($key, '.')) {
                         if (is_array($settings['langFile.'][$key . '.'])) {
                             array_push($langFiles, self::getSingle($settings['langFile.'], $key));
                         } else {
@@ -248,7 +248,7 @@ class GeneralUtility implements SingletonInterface
         } else {
             foreach ($langFiles as $idx => $langFile) {
                 $localized = LocalizationUtility::translate('LLL:' . $langFile . ':' . $key);
-                if (trim($localized) !== '') {
+                if (trim($localized ?? '') !== '') {
                     $message = $localized;
                 }
             }
@@ -305,18 +305,18 @@ class GeneralUtility implements SingletonInterface
      * @param mixed $redirect Page id or URL to redirect to
      * @param bool $correctRedirectUrl replace &amp; with & in URL
      */
-    public static function doRedirect($redirect, $correctRedirectUrl, $additionalParams = [], $headerStatusCode = '')
+    public static function doRedirect($redirect, $correctRedirectUrl, $additionalParams = [], $headerStatusCode = ''): void
     {
 
         // these parameters have to be added to the redirect url
         $addParams = [];
-        if (\TYPO3\CMS\Core\Utility\GeneralUtility::_GP('L')) {
-            $addParams['L'] = \TYPO3\CMS\Core\Utility\GeneralUtility::_GP('L');
+        if ($GLOBALS['TYPO3_REQUEST']->getParsedBody()['L'] ?? $GLOBALS['TYPO3_REQUEST']->getQueryParams()['L'] ?? null) {
+            $addParams['L'] = $GLOBALS['TYPO3_REQUEST']->getParsedBody()['L'] ?? $GLOBALS['TYPO3_REQUEST']->getQueryParams()['L'] ?? null;
         }
 
         if (is_array($additionalParams)) {
             foreach ($additionalParams as $param => $value) {
-                if (false === strpos($param, '.')) {
+                if (!str_contains($param, '.')) {
                     if (is_array($additionalParams[$param . '.'])) {
                         $value = self::getSingle($additionalParams, $param);
                     }
@@ -355,7 +355,7 @@ class GeneralUtility implements SingletonInterface
      * @param array $gp Array with GET/POST parameters
      * @param string $redirectPageSetting Name of the Typoscript setting which holds the redirect page.
      */
-    public static function doRedirectBasedOnSettings($settings, $gp, $redirectPageSetting = 'redirectPage')
+    public static function doRedirectBasedOnSettings($settings, $gp, $redirectPageSetting = 'redirectPage'): void
     {
         $redirectPage = self::getSingle($settings, $redirectPageSetting);
 
@@ -572,7 +572,7 @@ class GeneralUtility implements SingletonInterface
      * @param int $severity The severity of the message. Valid values are 1,2 and 3 (1= info, 2 = warning, 3 = error)
      * @param array $data Additional debug data (e.g. the array of GET/POST values)
      */
-    public static function debugMessage($key, array $printfArgs = [], $severity = 1, array $data = [])
+    public static function debugMessage($key, array $printfArgs = [], $severity = 1, array $data = []): void
     {
         $severity = (int)$severity;
         $message = self::getDebugMessage($key);
@@ -587,7 +587,7 @@ class GeneralUtility implements SingletonInterface
         }
     }
 
-    public static function debugMailContent($emailObj)
+    public static function debugMailContent($emailObj): void
     {
         self::debugMessage('mail_subject', [$emailObj->getSubject()]);
 
@@ -614,18 +614,18 @@ class GeneralUtility implements SingletonInterface
      *
      * @param string $key Key in language file
      */
-    public static function throwException($key)
+    public static function throwException($key): void
     {
         $message = self::getExceptionMessage($key);
         if (strlen($message) == 0) {
-            throw new \Exception($key);
+            throw new \Exception($key, 3319345663);
         }
         if (func_num_args() > 1) {
             $args = func_get_args();
             array_shift($args);
             $message = vsprintf($message, $args);
         }
-        throw new \Exception($message);
+        throw new \Exception($message, 7962204351);
     }
 
     /**
@@ -648,7 +648,7 @@ class GeneralUtility implements SingletonInterface
     public static function resolvePath($path)
     {
         $path = explode('/', $path);
-        if (strpos($path[0], 'EXT') === 0) {
+        if (str_starts_with($path[0], 'EXT')) {
             $parts = explode(':', $path[0]);
             $path[0] = ExtensionManagementUtility::extPath($parts[1]);
         }
@@ -666,7 +666,7 @@ class GeneralUtility implements SingletonInterface
     public static function resolveRelPath($path)
     {
         $path = explode('/', $path);
-        if (strpos($path[0], 'EXT') === 0) {
+        if (str_starts_with($path[0], 'EXT')) {
             $parts = explode(':', $path[0]);
             $path[0] = PathUtility::getAbsoluteWebPath(ExtensionManagementUtility::extPath($parts[1]));
         }
@@ -687,7 +687,7 @@ class GeneralUtility implements SingletonInterface
             return $path;
         }
         $path = explode('/', $path);
-        if (strpos($path[0], 'EXT') === 0) {
+        if (str_starts_with($path[0], 'EXT')) {
             return \TYPO3\CMS\Core\Utility\GeneralUtility::getFileAbsFileName(implode('/', $path));
         }
         $path = implode('/', $path);
@@ -832,10 +832,11 @@ class GeneralUtility implements SingletonInterface
         return $randomID;
     }
 
-    public static function initializeTSFE($pid)
+    public static function initializeTSFE($pid): void
     {
+        $request = $GLOBALS['TYPO3_REQUEST'];
         // create object instances:
-        $GLOBALS['TSFE'] = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController', $GLOBALS['TYPO3_CONF_VARS'], $pid, 0, true);
+        $GLOBALS['TSFE'] = $request->getAttribute('frontend.controller');
         $GLOBALS['TSFE']->tmpl = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\CMS\Core\TypoScript\TemplateService');
         $GLOBALS['TSFE']->tmpl->init();
         $GLOBALS['TSFE']->fe_user->fetchGroupData();
@@ -843,8 +844,8 @@ class GeneralUtility implements SingletonInterface
         // Get the page
         $GLOBALS['TSFE']->fetch_the_id();
         $GLOBALS['TSFE']->getConfigArray();
-        if (is_array($GLOBALS['TSFE']->tmpl->setup['includeLibs.'])) {
-            $GLOBALS['TSFE']->includeLibraries($GLOBALS['TSFE']->tmpl->setup['includeLibs.']);
+        if (is_array($GLOBALS['TYPO3_REQUEST']->getAttribute('frontend.typoscript')->getSetupArray()['includeLibs.'])) {
+            $GLOBALS['TSFE']->includeLibraries($GLOBALS['TYPO3_REQUEST']->getAttribute('frontend.typoscript')->getSetupArray()['includeLibs.']);
         }
         $GLOBALS['TSFE']->settingLanguage();
         $GLOBALS['TSFE']->newCObj();
@@ -961,16 +962,16 @@ class GeneralUtility implements SingletonInterface
         $qty = substr($value, 0, $value_length - 1);
         $unit = strtolower(substr($value, $value_length - 1));
         switch ($unit) {
-                case 'k':
-                    $qty *= 1024;
-                    break;
-                case 'm':
-                    $qty *= 1048576;
-                    break;
-                case 'g':
-                    $qty *= 1073741824;
-                    break;
-            }
+            case 'k':
+                $qty *= 1024;
+                break;
+            case 'm':
+                $qty *= 1048576;
+                break;
+            case 'g':
+                $qty *= 1073741824;
+                break;
+        }
         return $qty;
     }
 
@@ -1124,7 +1125,7 @@ class GeneralUtility implements SingletonInterface
         $resourceFiles = [];
         if (!self::isValidCObject($resourceFile) && $settings[$key . '.']) {
             foreach ($settings[$key . '.'] as $idx => $file) {
-                if (strpos($idx, '.') === false) {
+                if (!str_contains($idx, '.')) {
                     $file = self::getSingle($settings[$key . '.'], $idx);
                     $fileOptions = $settings[$key . '.'][$idx . '.'];
                     $fileOptions['file'] = $file;
@@ -1152,7 +1153,7 @@ class GeneralUtility implements SingletonInterface
                 break;
             case '^=':
                 $value = self::parseOperand($valueConditions[2], $gp);
-                $conditionResult = strpos(self::getGlobal($fieldName, $gp), $value) === 0;
+                $conditionResult = str_starts_with(self::getGlobal($fieldName, $gp), $value);
                 break;
             case '$=':
                 $gpValue = self::getGlobal($fieldName, $gp);
@@ -1166,7 +1167,7 @@ class GeneralUtility implements SingletonInterface
                 if (is_array($gpValue)) {
                     $conditionResult = in_array($value, $gpValue);
                 } else {
-                    $conditionResult = strpos(self::getGlobal($fieldName, $gp), $value) !== false;
+                    $conditionResult = str_contains(self::getGlobal($fieldName, $gp), $value);
                 }
                 break;
             case '=':

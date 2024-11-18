@@ -20,7 +20,6 @@ namespace Typoheads\Formhandler\Interceptor;
  */
 class TranslateFields extends AbstractInterceptor
 {
-
     /**
      * The main method called by the controller
      *

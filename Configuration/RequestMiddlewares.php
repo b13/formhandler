@@ -1,10 +1,12 @@
 <?php
 
+use Typoheads\Formhandler\Middleware\AjaxValidate;
+
 return [
 
     'frontend' => [
         'formhandler-ajax-validate' => [
-            'target' => \Typoheads\Formhandler\Middleware\AjaxValidate::class,
+            'target' => AjaxValidate::class,
             'after' => [
                 'typo3/cms-frontend/tsfe',
             ],

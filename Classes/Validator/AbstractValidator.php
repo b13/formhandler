@@ -21,7 +21,6 @@ use Typoheads\Formhandler\Component\AbstractComponent;
  */
 abstract class AbstractValidator extends AbstractComponent
 {
-
     /**
      * Validates the submitted values using given settings
      *
@@ -30,7 +29,7 @@ abstract class AbstractValidator extends AbstractComponent
      */
     abstract public function validate(&$errors);
 
-    public function process()
+    public function process(): void
     {
         return;
     }

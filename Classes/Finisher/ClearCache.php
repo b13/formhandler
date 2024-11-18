@@ -35,7 +35,6 @@ namespace Typoheads\Formhandler\Finisher;
  */
 class ClearCache extends AbstractFinisher
 {
-
     /**
      * The main method called by the controller
      *

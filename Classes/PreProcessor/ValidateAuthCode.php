@@ -24,7 +24,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class ValidateAuthCode extends AbstractPreProcessor
 {
-
     /**
      * The main method called by the controller
      *
@@ -135,7 +134,7 @@ class ValidateAuthCode extends AbstractPreProcessor
                 if ($redirectPage) {
                     $this->utilityFuncs->doRedirectBasedOnSettings($this->settings, $this->gp, 'errorRedirectPage');
                 } else {
-                    throw new \Exception($e->getMessage());
+                    throw new \Exception($e->getMessage(), 8617095724);
                 }
             }
         }

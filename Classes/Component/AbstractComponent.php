@@ -22,7 +22,6 @@ namespace Typoheads\Formhandler\Component;
  */
 abstract class AbstractComponent extends AbstractClass
 {
-
     /**
      * The GET/POST parameters
      *
@@ -43,7 +42,7 @@ abstract class AbstractComponent extends AbstractClass
      * @param array $gp GET and POST variable array
      * @param array $settings Typoscript configuration for the component (component.1.config.*)
      */
-    public function init($gp, $settings)
+    public function init($gp, $settings): void
     {
         $this->gp = $gp;
         $this->settings = $settings;

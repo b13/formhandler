@@ -20,13 +20,10 @@ namespace Typoheads\Formhandler\Generator;
  */
 class PrintVersion extends AbstractGenerator
 {
-
     /**
      * Unused
      */
-    public function process()
-    {
-    }
+    public function process() {}
 
     /* (non-PHPdoc)
      * @see Classes/Generator/AbstractGenerator#getLinkText()

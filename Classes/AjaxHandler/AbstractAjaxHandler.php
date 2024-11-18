@@ -23,7 +23,6 @@ use Typoheads\Formhandler\Component\AbstractClass;
  */
 abstract class AbstractAjaxHandler extends AbstractClass
 {
-
     /**
      * Initialize AJAX stuff
      */
@@ -34,7 +33,7 @@ abstract class AbstractAjaxHandler extends AbstractClass
      *
      * @param array $settings The settings of the AjaxHandler
      */
-    public function init($settings)
+    public function init($settings): void
     {
         $this->settings = $settings;
     }

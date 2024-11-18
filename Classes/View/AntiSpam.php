@@ -18,6 +18,4 @@ namespace Typoheads\Formhandler\View;
 /**
  * A default view for Formhandler E-Mails
  */
-class AntiSpam extends Form
-{
-}
+class AntiSpam extends Form {}

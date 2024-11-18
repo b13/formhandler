@@ -20,7 +20,6 @@ namespace Typoheads\Formhandler\Generator;
  */
 class File extends AbstractGenerator
 {
-
     /**
      * Renders the XML file.
      */

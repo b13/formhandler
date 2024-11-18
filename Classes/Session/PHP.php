@@ -20,11 +20,10 @@ namespace Typoheads\Formhandler\Session;
  */
 class PHP extends AbstractSession
 {
-
     /* (non-PHPdoc)
      * @see Classes/Session/Tx_Formhandler_AbstractSession#set()
     */
-    public function set($key, $value)
+    public function set($key, $value): void
     {
         $this->start();
         $data = $_SESSION['formhandler'];
@@ -38,7 +37,7 @@ class PHP extends AbstractSession
     /* (non-PHPdoc)
      * @see Classes/Session/Tx_Formhandler_AbstractSession#setMultiple()
     */
-    public function setMultiple($values)
+    public function setMultiple($values): void
     {
         if (is_array($values) && !empty($values)) {
             $this->start();
@@ -79,13 +78,13 @@ class PHP extends AbstractSession
     /* (non-PHPdoc)
      * @see Classes/Session/Tx_Formhandler_AbstractSession#reset()
     */
-    public function reset()
+    public function reset(): void
     {
         $this->start();
         unset($_SESSION['formhandler'][$this->globals->getRandomID()]);
     }
 
-    public function init($gp, $settings)
+    public function init($gp, $settings): void
     {
         parent::init($gp, $settings);
 

@@ -2,6 +2,7 @@
 
 namespace Typoheads\Formhandler\Component;
 
+use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 use Typoheads\Formhandler\Controller\Configuration;
 use Typoheads\Formhandler\Utility\GeneralUtility;
 use Typoheads\Formhandler\Utility\Globals;
@@ -25,39 +26,15 @@ use Typoheads\Formhandler\Utility\Globals;
  */
 abstract class AbstractClass
 {
-
-    /**
-     * The Formhandler component manager
-     *
-     * @var \Typoheads\Formhandler\Component\Manager
-     */
-    protected $componentManager;
-
-    /**
-     * The global Formhandler configuration
-     *
-     * @var \Typoheads\Formhandler\Controller\Configuration
-     */
-    protected $configuration;
-
-    /**
-     * The global Formhandler values
-     *
-     * @var \Typoheads\Formhandler\Utility\Globals
-     */
-    protected $globals;
-
-    /**
-     * The Formhandler utility methods
-     *
-     * @var \Typoheads\Formhandler\Utility\GeneralUtility
-     */
-    protected $utilityFuncs;
+    protected Manager $componentManager;
+    protected Configuration $configuration;
+    protected Globals $globals;
+    protected GeneralUtility $utilityFuncs;
 
     /**
      * The cObj
      *
-     * @var \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer
+     * @var ContentObjectRenderer
      */
     protected $cObj;
 
@@ -74,19 +51,15 @@ abstract class AbstractClass
     /**
      * The constructor for an interceptor setting the component manager and the configuration.
      *
-     * @param \Typoheads\Formhandler\Component\Manager $componentManager
-     * @param \Typoheads\Formhandler\Controller\Configuration $configuration
+     * @param Manager $componentManager
+     * @param Configuration $configuration
      */
     public function __construct(
-        Manager $componentManager,
-        Configuration $configuration,
-        Globals $globals,
-        GeneralUtility $utilityFuncs
     ) {
-        $this->componentManager = $componentManager;
-        $this->configuration = $configuration;
-        $this->globals = $globals;
-        $this->utilityFuncs = $utilityFuncs;
+        $this->componentManager = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(Manager::class);
+        $this->configuration = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(Configuration::class);
+        $this->globals = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(Globals::class);
+        $this->utilityFuncs = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(GeneralUtility::class);
         $this->cObj = $this->globals->getCObj();
     }
 }

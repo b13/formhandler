@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
+use Typoheads\Formhandler\Domain\Model\Demand;
+use Typoheads\Formhandler\Domain\Model\LogData;
+
 return [
-    \Typoheads\Formhandler\Domain\Model\LogData::class => [
+    LogData::class => [
         'tableName' => 'tx_formhandler_log',
         'properties' => [
             'crdate' => [
@@ -20,7 +23,7 @@ return [
             ],
         ],
     ],
-    \Typoheads\Formhandler\Domain\Model\Demand::class => [
+    Demand::class => [
         'tableName' => 'tx_formhandler_log',
         'properties' => [
             'isSpam' => [

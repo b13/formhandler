@@ -19,7 +19,6 @@ namespace Typoheads\Formhandler\Controller;
  */
 class Content
 {
-
     /**
      * The actual content
      *
@@ -40,7 +39,7 @@ class Content
      *
      * @param string $content
      */
-    public function setContent($content)
+    public function setContent($content): void
     {
         $this->content = $content;
     }

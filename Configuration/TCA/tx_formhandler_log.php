@@ -16,12 +16,10 @@ return [
             'exclude' => 1,
             'label' => 'LLL:EXT:formhandler/Resources/Private/Language/locallang_db.xlf:tx_formhandler_log.submission_date',
             'config' => [
-                'type' => 'input',
+                'type' => 'datetime',
                 'size' => '10',
-                'eval' => 'datetime',
                 'checkbox' => '0',
-                'default' => '0',
-                'renderType' => 'inputDateTime',
+                'default' => 0,
             ],
         ],
         'ip' => [

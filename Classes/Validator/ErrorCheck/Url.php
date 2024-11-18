@@ -21,7 +21,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class Url extends AbstractErrorCheck
 {
-
     /**
      * Validates that a specified field has valid url syntax.
      *

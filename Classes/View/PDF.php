@@ -21,7 +21,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class PDF extends Form
 {
-
     /**
      * Main method called by the controller.
      *

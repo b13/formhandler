@@ -34,7 +34,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class StoreUploadedFiles extends AbstractFinisher
 {
-
     /**
      * The main method called by the controller
      *

@@ -15,7 +15,6 @@ use Typoheads\Formhandler\Ajax\Validate;
 
 class AjaxValidate implements MiddlewareInterface
 {
-
     public const NAMESPACE = 'tx-formhandler-ajax-validate';
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface

@@ -2,6 +2,7 @@
 
 namespace Typoheads\Formhandler\Mailer;
 
+use TYPO3\CMS\Core\Mail\MailMessage;
 use Typoheads\Formhandler\Component\Manager;
 use Typoheads\Formhandler\Controller\Configuration;
 use Typoheads\Formhandler\Utility\GeneralUtility;
@@ -22,22 +23,20 @@ use Typoheads\Formhandler\Utility\Globals;
 
 class TYPO3Mailer extends AbstractMailer implements MailerInterface
 {
-
     /**
      * The TYPO3 mail message object
      *
-     * @var \TYPO3\CMS\Core\Mail\MailMessage
+     * @var MailMessage
      */
     protected $emailObj;
-
 
     /**
      * Initializes the email object and calls the parent constructor
      *
-     * @param \Typoheads\Formhandler\Component\Manager $componentManager
-     * @param \Typoheads\Formhandler\Controller\Configuration $configuration
-     * @param \Typoheads\Formhandler\Utility\Globals $globals
-     * @param \Typoheads\Formhandler\Utility\GeneralUtility $utilityFuncs
+     * @param Manager $componentManager
+     * @param Configuration $configuration
+     * @param Globals $globals
+     * @param GeneralUtility $utilityFuncs
      */
     public function __construct(
         Manager $componentManager,
@@ -70,7 +69,7 @@ class TYPO3Mailer extends AbstractMailer implements MailerInterface
     /* (non-PHPdoc)
      * @see Classes/Mailer/Tx_FormhandlerMailerInterface#setHTML()
     */
-    public function setHTML($html)
+    public function setHTML($html): void
     {
         $this->emailObj->html($html);
     }
@@ -78,7 +77,7 @@ class TYPO3Mailer extends AbstractMailer implements MailerInterface
     /* (non-PHPdoc)
      * @see Classes/Mailer/Tx_FormhandlerMailerInterface#setPlain()
     */
-    public function setPlain($plain)
+    public function setPlain($plain): void
     {
         $this->emailObj->text($plain);
     }
@@ -86,7 +85,7 @@ class TYPO3Mailer extends AbstractMailer implements MailerInterface
     /* (non-PHPdoc)
      * @see Classes/Mailer/Tx_FormhandlerMailerInterface#setSubject()
     */
-    public function setSubject($value)
+    public function setSubject($value): void
     {
         $this->emailObj->setSubject($value);
     }
@@ -100,7 +99,7 @@ class TYPO3Mailer extends AbstractMailer implements MailerInterface
      * @param string $email
      * @param string $name
      */
-    public function setSender($email, $name)
+    public function setSender($email, $name): void
     {
         if (!empty($email)) {
             $this->emailObj->setFrom($email, $name);
@@ -110,7 +109,7 @@ class TYPO3Mailer extends AbstractMailer implements MailerInterface
     /* (non-PHPdoc)
      * @see Classes/Mailer/Tx_FormhandlerMailerInterface#setReplyTo()
     */
-    public function setReplyTo($email, $name)
+    public function setReplyTo($email, $name): void
     {
         if (!empty($email)) {
             $this->emailObj->setReplyTo($email, $name);
@@ -120,7 +119,7 @@ class TYPO3Mailer extends AbstractMailer implements MailerInterface
     /* (non-PHPdoc)
      * @see Classes/Mailer/Tx_FormhandlerMailerInterface#addCc()
     */
-    public function addCc($email, $name)
+    public function addCc($email, $name): void
     {
         $this->emailObj->addCc($email, $name);
     }
@@ -128,7 +127,7 @@ class TYPO3Mailer extends AbstractMailer implements MailerInterface
     /* (non-PHPdoc)
      * @see Classes/Mailer/Tx_FormhandlerMailerInterface#addBcc()
     */
-    public function addBcc($email, $name)
+    public function addBcc($email, $name): void
     {
         $this->emailObj->addBcc($email, $name);
     }
@@ -136,7 +135,7 @@ class TYPO3Mailer extends AbstractMailer implements MailerInterface
     /* (non-PHPdoc)
      * @see Classes/Mailer/Tx_FormhandlerMailerInterface#setReturnPath()
     */
-    public function setReturnPath($value)
+    public function setReturnPath($value): void
     {
         $this->emailObj->setReturnPath($value);
     }
@@ -144,7 +143,7 @@ class TYPO3Mailer extends AbstractMailer implements MailerInterface
     /* (non-PHPdoc)
      * @see Classes/Mailer/Tx_FormhandlerMailerInterface#addHeader()
     */
-    public function addHeader($value)
+    public function addHeader($value): void
     {
         //@TODO: Find a good way to make headers configurable
     }
@@ -152,7 +151,7 @@ class TYPO3Mailer extends AbstractMailer implements MailerInterface
     /* (non-PHPdoc)
      * @see Classes/Mailer/Tx_FormhandlerMailerInterface#addAttachment()
     */
-    public function addAttachment($value)
+    public function addAttachment($value): void
     {
         $this->emailObj->attachFromPath($value);
     }

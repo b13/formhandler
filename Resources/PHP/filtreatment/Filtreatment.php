@@ -18,7 +18,6 @@
  */
 class Filtreatment
 {
-
     //-----------------------------------------------------------------------------
     /**
     * CLEANS AGAINST XSS
@@ -194,13 +193,13 @@ class Filtreatment
         */
 
         $bad = [
-                'document.cookie'	=> '',
-                'document.write'	=> '',
-                'window.location'	=> '',
-                "javascript\s*:"	=> '',
-                "Redirect\s+302"	=> '',
-                '<!--'			=> '&lt;!--',
-                '-->'			=> '--&gt;',
+            'document.cookie'	=> '',
+            'document.write'	=> '',
+            'window.location'	=> '',
+            "javascript\s*:"	=> '',
+            "Redirect\s+302"	=> '',
+            '<!--'			=> '&lt;!--',
+            '-->'			=> '--&gt;',
         ];
 
         foreach ($bad as $key => $val) {

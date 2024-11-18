@@ -53,7 +53,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class LoadDB extends AbstractPreProcessor
 {
-
     /**
      * @var array $data as associative array. Row data from DB.
      */
@@ -167,7 +166,7 @@ class LoadDB extends AbstractPreProcessor
                 }
 
                 foreach ($filesArray as $k => $uploadFile) {
-                    if (strpos($uploadFile, '/') !== false) {
+                    if (str_contains($uploadFile, '/')) {
                         $file = Environment::getPublicPath() . '/' . $uploadFile;
                         $uploadedUrl = GeneralUtility::getIndpEnv('TYPO3_SITE_URL') . $uploadFile;
                     } else {
@@ -205,7 +204,7 @@ class LoadDB extends AbstractPreProcessor
         $this->utilityFuncs->debugMessage($sql);
         $stmt = $connection->executeQuery($sql);
 
-        $rows = $stmt->fetchAll();
+        $rows = $stmt->fetchAllAssociative();
         $rowCount = count($rows);
         if ($rowCount === 1) {
             return reset($rows);

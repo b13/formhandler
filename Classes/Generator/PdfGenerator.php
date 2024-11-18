@@ -20,13 +20,10 @@ namespace Typoheads\Formhandler\Generator;
  */
 class PdfGenerator extends AbstractGenerator
 {
-
     /**
      * Renders the PDF.
      */
-    public function process()
-    {
-    }
+    public function process() {}
 
     /* (non-PHPdoc)
      * @see Classes/Generator/AbstractGenerator#getComponentLinkParams($linkGP)

@@ -22,7 +22,6 @@ use Typoheads\Formhandler\Component\AbstractComponent;
  */
 class BackendTcPdf extends AbstractComponent
 {
-
     /**
      * The internal PDF object
      *
@@ -30,7 +29,7 @@ class BackendTcPdf extends AbstractComponent
      */
     protected $pdf;
 
-    public function init($gp, $settings)
+    public function init($gp, $settings): void
     {
         parent::init($gp, $settings);
         $fileName = $this->utilityFuncs->getSingle($this->settings, 'fileName');
@@ -64,7 +63,7 @@ class BackendTcPdf extends AbstractComponent
         $this->settings['font'] = $font;
     }
 
-    public function process()
+    public function process(): void
     {
         $records = $this->settings['records'];
         $exportFields = $this->settings['exportFields'];
@@ -133,7 +132,7 @@ class BackendTcPdf extends AbstractComponent
                             $this->pdf->Cell($feedWidth);
                             $this->pdf->Cell($nameWidth, '6', $key, 0, 0, 'L', $fill);
                             $arrayValue = array_shift($value);
-                            if (strpos($arrayValue, "\n") === false && strpos($arrayValue, "\r") === false && strlen($arrayValue) < $valueWidth - 40) {
+                            if (!str_contains($arrayValue, "\n")   && !str_contains($arrayValue, "\r")   && strlen($arrayValue) < $valueWidth - 40) {
                                 $this->pdf->Cell($valueWidth, '6', $arrayValue, 0, 0, 'L', $fill);
                             } else {
                                 $this->pdf->MultiCell($valueWidth, '6', $arrayValue, 0, 0, 'L', $fill);
@@ -142,7 +141,7 @@ class BackendTcPdf extends AbstractComponent
                             foreach ($value as $v) {
                                 $this->pdf->Cell($feedWidth);
                                 $this->pdf->Cell($nameWidth, '6', '', 0, 0, 'L', $fill);
-                                if (strpos($v, "\n") === false && strpos($v, "\r") === false && strlen($v) < $valueWidth - 40) {
+                                if (!str_contains($v, "\n")   && !str_contains($v, "\r")   && strlen($v) < $valueWidth - 40) {
                                     $this->pdf->Cell($valueWidth, '6', $v, 0, 0, 'L', $fill);
                                 } else {
                                     $this->pdf->MultiCell($valueWidth, '6', $v, 0, 0, 'L', $fill);
@@ -153,7 +152,7 @@ class BackendTcPdf extends AbstractComponent
                         } else {
                             $this->pdf->Cell($feedWidth);
                             $this->pdf->Cell($nameWidth, '6', $key, 0, 0, 'L', $fill);
-                            if (strpos($value, "\n") === false && strpos($value, "\r") === false && strlen($value) < $valueWidth - 40) {
+                            if (!str_contains($value, "\n")   && !str_contains($value, "\r")   && strlen($value) < $valueWidth - 40) {
                                 $this->pdf->Cell($valueWidth, '6', $value, 0, 0, 'L', $fill);
                             } else {
                                 $this->pdf->MultiCell($valueWidth, '6', $value, 0, 0, 'L', $fill);
@@ -181,7 +180,7 @@ class BackendTcPdf extends AbstractComponent
      *
      * @param string $templateCode The template code
      */
-    public function setTemplateCode($templateCode)
+    public function setTemplateCode($templateCode): void
     {
         $this->templateCode = $templateCode;
     }

@@ -27,7 +27,6 @@ namespace Typoheads\Formhandler\Finisher;
  */
 class Redirect extends AbstractFinisher
 {
-
     /**
      * The main method called by the controller
      *
@@ -52,7 +51,7 @@ class Redirect extends AbstractFinisher
      * @param array The GET/POST values
      * @param array The TypoScript configuration
      */
-    public function init($gp, $tsConfig)
+    public function init($gp, $tsConfig): void
     {
         $this->gp = $gp;
         $this->settings = $tsConfig;

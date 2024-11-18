@@ -3,6 +3,7 @@
 namespace Typoheads\Formhandler\Controller;
 
 use Psr\Http\Message\ResponseInterface;
+use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 use TYPO3\CMS\Extbase\Property\TypeConverter\PersistentObjectConverter;
@@ -26,7 +27,6 @@ use Typoheads\Formhandler\Generator\BackendCsv;
  */
 class ModuleController extends ActionController
 {
-
     /**
      * The request arguments
      *
@@ -37,7 +37,7 @@ class ModuleController extends ActionController
     /**
      * The Formhandler component manager
      *
-     * @var \Typoheads\Formhandler\Component\Manager
+     * @var Manager
      */
     protected $componentManager;
 
@@ -50,34 +50,30 @@ class ModuleController extends ActionController
 
     /**
      * @var LogDataRepository
-     * @TYPO3\CMS\Extbase\Annotation\Inject
      */
     protected $logDataRepository;
 
-    /**
-     * @param LogDataRepository $logDataRepository
-     */
-    public function injectLogDataRepository(LogDataRepository $logDataRepository)
+    public function __construct(LogDataRepository $logDataRepository)
     {
         $this->logDataRepository = $logDataRepository;
     }
 
     /**
-     * @var \TYPO3\CMS\Core\Page\PageRenderer
+     * @var PageRenderer
      */
     protected $pageRenderer;
 
     /**
      * init all actions
      */
-    public function initializeAction()
+    public function initializeAction(): void
     {
         $this->id = (int)($_GET['id']);
 
         $this->gp = $this->request->getArguments();
         $this->componentManager = GeneralUtility::makeInstance(Manager::class);
         $this->utilityFuncs = GeneralUtility::makeInstance(\Typoheads\Formhandler\Utility\GeneralUtility::class);
-        $this->pageRenderer = $this->objectManager->get('TYPO3\CMS\Core\Page\PageRenderer');
+        $this->pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
 
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/DateTimePicker');
 
@@ -143,7 +139,7 @@ class ModuleController extends ActionController
     /**
      * Displays log data
      */
-    public function indexAction(Demand $demand = null, int $page = null): ResponseInterface
+    public function indexAction(?Demand $demand = null, ?int $page = null): ResponseInterface
     {
         if ($demand === null) {
             $demand = GeneralUtility::makeInstance(Demand::class);
@@ -167,7 +163,7 @@ class ModuleController extends ActionController
         return $this->htmlResponse();
     }
 
-    public function viewAction(LogData $logDataRow = null): ResponseInterface
+    public function viewAction(?LogData $logDataRow = null): ResponseInterface
     {
         if ($logDataRow !== null) {
             $logDataRow->setParams(unserialize($logDataRow->getParams()));
@@ -182,12 +178,12 @@ class ModuleController extends ActionController
      * @param string uids to export
      * @param string export file type (PDF || CSV)
      */
-    public function selectFieldsAction($logDataUids = null, $filetype = '')
+    public function selectFieldsAction($logDataUids = null, $filetype = ''): ResponseInterface
     {
         if ($logDataUids !== null) {
             if ($this->settings[$filetype]['config']['fields']) {
                 $fields = GeneralUtility::trimExplode(',', $this->settings[$filetype]['config']['fields']);
-                $this->redirect(
+                return $this->redirect(
                     'export',
                     null,
                     null,
@@ -284,5 +280,10 @@ class ModuleController extends ActionController
             }
         }
         return $this->htmlResponse();
+    }
+
+    public function injectLogDataRepository(LogDataRepository $logDataRepository): void
+    {
+        $this->logDataRepository = $logDataRepository;
     }
 }

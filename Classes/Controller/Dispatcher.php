@@ -26,18 +26,17 @@ use Typoheads\Formhandler\Utility\Globals;
  */
 class Dispatcher extends AbstractPlugin
 {
-
     /**
      * Compontent Manager
      *
-     * @var \Typoheads\Formhandler\Component\Manager
+     * @var Manager
      */
     protected $componentManager;
 
     /**
      * The global Formhandler values
      *
-     * @var \Typoheads\Formhandler\Utility\Globals
+     * @var Globals
      */
     protected $globals;
 
@@ -92,13 +91,13 @@ class Dispatcher extends AbstractPlugin
              * 1. Default controller
              * 2. TypoScript
              */
-            $controller = '\Typoheads\Formhandler\Controller\Form';
+            $controllerClassName = 'Typoheads\Formhandler\Controller\Form';
             if ($setup['controller'] ?? false) {
-                $controller = $setup['controller'];
+                $controllerClassName = $setup['controller'];
             }
 
-            /** @var \Typoheads\Formhandler\Controller\AbstractController $controller */
-            $controller = $this->componentManager->getComponent($controller);
+            /** @var AbstractController $controller */
+            $controller = GeneralUtility::makeInstance($controllerClassName);
 
             if (isset($content)) {
                 $controller->setContent($this->componentManager->getComponent($this->utilityFuncs->prepareClassName('Typoheads\Formhandler\Controller\Content'), $content));
@@ -112,7 +111,6 @@ class Dispatcher extends AbstractPlugin
             if (strlen($predef) > 0) {
                 $controller->setPredefined($predef);
             }
-
 
             $result = $controller->process();
         } catch (\Exception $e) {

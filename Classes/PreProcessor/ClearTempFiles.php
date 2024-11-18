@@ -29,7 +29,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class ClearTempFiles extends AbstractPreProcessor
 {
-
     /**
      * The main method called by the controller
      *

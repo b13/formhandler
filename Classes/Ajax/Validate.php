@@ -29,7 +29,6 @@ use Typoheads\Formhandler\View\AjaxValidation;
  */
 class Validate
 {
-
     /**
      * @var array
      */
@@ -64,13 +63,13 @@ class Validate
         $controller->getConfigArray($request);
         $controller->newCObj();
 
-        $field = htmlspecialchars(GeneralUtility::_GP('field'));
+        $field = htmlspecialchars($GLOBALS['TYPO3_REQUEST']->getParsedBody()['field'] ?? $GLOBALS['TYPO3_REQUEST']->getQueryParams()['field'] ?? null);
         if ($field) {
-            $randomID = htmlspecialchars(GeneralUtility::_GP('randomID'));
+            $randomID = htmlspecialchars($GLOBALS['TYPO3_REQUEST']->getParsedBody()['randomID'] ?? $GLOBALS['TYPO3_REQUEST']->getQueryParams()['randomID'] ?? null);
             Globals::setCObj($GLOBALS['TSFE']->cObj);
             Globals::setRandomID($randomID);
             if (!Globals::getSession()) {
-                $ts = $GLOBALS['TSFE']->tmpl->setup['plugin.']['Tx_Formhandler.']['settings.'];
+                $ts = $GLOBALS['TYPO3_REQUEST']->getAttribute('frontend.typoscript')->getSetupArray()['plugin.']['Tx_Formhandler.']['settings.'];
                 $sessionClass = \Typoheads\Formhandler\Utility\GeneralUtility::getPreparedClassName($ts['session.'] ?? null, 'Session\PHP');
                 Globals::setSession($this->componentManager->getComponent($sessionClass));
             }

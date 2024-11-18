@@ -21,7 +21,7 @@ namespace Typoheads\Formhandler\Validator\ErrorCheck;
  */
 class NotDefaultValue extends AbstractErrorCheck
 {
-    public function init($gp, $settings)
+    public function init($gp, $settings): void
     {
         parent::init($gp, $settings);
         $this->mandatoryParameters = ['defaultValue'];

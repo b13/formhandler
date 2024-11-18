@@ -21,7 +21,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class ParseValues extends AbstractInterceptor
 {
-
     /**
      * The main method called by the controller
      *

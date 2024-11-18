@@ -25,7 +25,6 @@ use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
  */
 class Form extends AbstractView
 {
-
     /**
      * An array of fields to do not encode for output
      *
@@ -165,7 +164,7 @@ class Form extends AbstractView
             );
         } elseif (isset($this->settings['masterTemplateFile.']) && is_array($this->settings['masterTemplateFile.'])) {
             foreach ($this->settings['masterTemplateFile.'] as $key => $masterTemplate) {
-                if (false === strpos($key, '.')) {
+                if (!str_contains($key, '.')) {
                     if (is_array($this->settings['masterTemplateFile.'][$key . '.'])) {
                         array_push(
                             $this->masterTemplates,
@@ -302,7 +301,7 @@ class Form extends AbstractView
                     }
                     $count++;
                 }
-                $write = (boolean)$finalConditionResult;
+                $write = (bool)$finalConditionResult;
                 $replacement = '';
                 if ($write) {
                     $replacement = '${1}';
@@ -395,7 +394,7 @@ class Form extends AbstractView
      */
     protected function fillDefaultMarkers()
     {
-        $parameters = GeneralUtility::_GET();
+        $parameters = $GLOBALS['TYPO3_REQUEST']->getQueryParams();
         if (isset($parameters['id'])) {
             unset($parameters['id']);
         }
@@ -619,8 +618,6 @@ class Form extends AbstractView
             );
         }
 
-
-
         $this->template = $this->markerBasedTemplateService->substituteMarkerArray($this->template, $markers);
     }
 
@@ -696,7 +693,7 @@ class Form extends AbstractView
      *
      * @param array &$markers Reference to the markers array
      */
-    public function fillFileMarkers(&$markers)
+    public function fillFileMarkers(&$markers): void
     {
         $settings = $this->parseSettings();
 
@@ -751,7 +748,7 @@ class Form extends AbstractView
                                                 $markers['###' . $replacedFieldname . '_minSize###'] = GeneralUtility::formatSize($minSize, ' Bytes| KB| MB| GB');
                                                 break;
                                             case 'fileMaxSize':
-                                                $maxSize = $fieldSettings['errorCheck.'][$key . '.']['maxSize'];
+                                                $maxSize = (int)$fieldSettings['errorCheck.'][$key . '.']['maxSize'];
                                                 $markers['###' . $replacedFieldname . '_maxSize###'] = GeneralUtility::formatSize($maxSize, ' Bytes| KB| MB| GB');
                                                 break;
                                             case 'fileAllowedTypes':

@@ -24,13 +24,12 @@ use Typoheads\Formhandler\Utility\Globals;
  */
 class Configuration implements \ArrayAccess
 {
-
     /**
      * The package key
      *
      * @var string
      */
-    const PACKAGE_KEY = 'Formhandler';
+    public const PACKAGE_KEY = 'Formhandler';
 
     /**
      * The TS setup
@@ -57,7 +56,7 @@ class Configuration implements \ArrayAccess
         if (ApplicationType::fromRequest($GLOBALS['TYPO3_REQUEST'])->isFrontend()) {
             $this->globals = GeneralUtility::makeInstance(Globals::class);
             $this->utilityFuncs = GeneralUtility::makeInstance(\Typoheads\Formhandler\Utility\GeneralUtility::class);
-            $this->setup = $GLOBALS['TSFE']->tmpl->setup['plugin.'][$this->getPrefixedPackageKey() . '.'];
+            $this->setup = $GLOBALS['TYPO3_REQUEST']->getAttribute('frontend.typoscript')->getSetupArray()['plugin.'][$this->getPrefixedPackageKey() . '.'];
             if (!is_array($this->setup)) {
                 $this->utilityFuncs->throwException('missing_config');
             }
@@ -72,7 +71,7 @@ class Configuration implements \ArrayAccess
      *
      * @param array|null $setup
      */
-    public function merge($setup)
+    public function merge($setup): void
     {
         if (isset($setup) && is_array($setup)) {
             $settings = $this->setup['settings.'];

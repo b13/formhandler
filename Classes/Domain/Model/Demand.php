@@ -2,8 +2,6 @@
 
 namespace Typoheads\Formhandler\Domain\Model;
 
-use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
-
 /*
  * This file is part of the TYPO3 CMS project.
  *
@@ -21,7 +19,6 @@ use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
  */
 class Demand
 {
-
     /**
      * @var int
      */
@@ -45,7 +42,6 @@ class Demand
      * @var int
      */
     protected $endTimestamp = 0;
-
 
     /**
      * Manual date start
@@ -73,13 +69,12 @@ class Demand
 
     /**
      * @param string $ip
-     * @return void
      */
-    public function setIp(?string $ip = null)
+    public function setIp(?string $ip = null): void
     {
         $this->ip = $ip;
     }
-    
+
     /**
      * @return int
      */
@@ -90,7 +85,6 @@ class Demand
 
     /**
      * @param int $pid
-     * @return void
      */
     public function setPid(int $pid): void
     {
@@ -107,7 +101,6 @@ class Demand
 
     /**
      * @param int $page
-     * @return void
      */
     public function setPage(int $page): void
     {
@@ -124,7 +117,6 @@ class Demand
 
     /**
      * @param int $limit
-     * @return void
      */
     public function setLimit(int $limit): void
     {
@@ -159,7 +151,6 @@ class Demand
         $this->endTimestamp = $endTimestamp;
     }
 
-
     public function getParameters(): array
     {
         $parameters = [];
@@ -186,7 +177,7 @@ class Demand
      *
      * @param \DateTime $manualDateStart
      */
-    public function setManualDateStart(\DateTime $manualDateStart = null)
+    public function setManualDateStart(?\DateTime $manualDateStart = null): void
     {
         $this->manualDateStart = $manualDateStart;
     }
@@ -206,7 +197,7 @@ class Demand
      *
      * @param \DateTime $manualDateStop
      */
-    public function setManualDateStop(\DateTime $manualDateStop = null)
+    public function setManualDateStop(?\DateTime $manualDateStop = null): void
     {
         $this->manualDateStop = $manualDateStop;
     }

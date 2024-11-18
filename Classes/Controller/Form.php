@@ -24,7 +24,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class Form extends AbstractController
 {
-
     /**
      * The current GET/POST parameters of the form
      *
@@ -113,9 +112,9 @@ class Form extends AbstractController
         $this->storeFileNamesInGP();
         $this->processFileRemoval();
 
-        $action = GeneralUtility::_GP('action');
+        $action = $GLOBALS['TYPO3_REQUEST']->getParsedBody()['action'] ?? $GLOBALS['TYPO3_REQUEST']->getQueryParams()['action'] ?? null;
         if ($this->globals->getFormValuesPrefix()) {
-            $temp = GeneralUtility::_GP($this->globals->getFormValuesPrefix());
+            $temp = $GLOBALS['TYPO3_REQUEST']->getParsedBody()[$this->globals->getFormValuesPrefix()] ?? $GLOBALS['TYPO3_REQUEST']->getQueryParams()[$this->globals->getFormValuesPrefix()] ?? null;
             $action = $temp['action'] ?? null;
         }
         if ($action) {
@@ -155,13 +154,13 @@ class Form extends AbstractController
         $content = '';
         $gp = $_GET;
         if ($this->globals->getFormValuesPrefix()) {
-            $gp = GeneralUtility::_GP($this->globals->getFormValuesPrefix());
+            $gp = $GLOBALS['TYPO3_REQUEST']->getParsedBody()[$this->globals->getFormValuesPrefix()] ?? $GLOBALS['TYPO3_REQUEST']->getQueryParams()[$this->globals->getFormValuesPrefix()] ?? null;
         }
         if (is_array($this->settings['finishers.'])) {
             $finisherConf = [];
 
             foreach ($this->settings['finishers.'] as $key => $config) {
-                if (strpos($key, '.') !== false) {
+                if (str_contains($key, '.')) {
                     $className = $this->utilityFuncs->getPreparedClassName($config);
                     if ($className === $this->utilityFuncs->prepareClassName('\Typoheads\Formhandler\Finisher\SubmittedOK') && is_array($config['config.'])) {
                         $finisherConf = $config['config.'];
@@ -172,11 +171,11 @@ class Form extends AbstractController
             $params = [];
             $tstamp = (int)$gp['tstamp'];
             $hash = $gp['hash'];
-            if ($tstamp && strpos($hash, ' ') === false) {
+            if ($tstamp && !str_contains($hash, ' ')) {
                 $conn = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('tx_formhandler_log');
                 $stmt = $conn->select(['params'], 'tx_formhandler_log', ['tstamp' => $tstamp, 'unique_hash' => $hash]);
                 if ($stmt->rowCount() === 1) {
-                    $row = $stmt->fetch();
+                    $row = $stmt->fetchAssociative();
                     $params = unserialize($row['params']);
                 }
             }
@@ -784,7 +783,7 @@ class Form extends AbstractController
                                         } else {
                                             $tmp['type'] = $files['type'][$field];
                                         }
-                                        if (!is_array($tempFiles[$field] ?? null ) && strlen((string)$field) > 0) {
+                                        if (!is_array($tempFiles[$field] ?? null) && strlen((string)$field) > 0) {
                                             $tempFiles[$field] = [];
                                         }
                                         if (!$exists || $uploadedFilesWithSameNameAction !== 'replace') {
@@ -951,7 +950,7 @@ class Form extends AbstractController
      * Validates the Formhandler config.
      * E.g. If email addresses were set in flexform then Finisher_Mail must exist in the TS configuration.
      */
-    public function validateConfig()
+    public function validateConfig(): void
     {
         $options = [
             ['to_email', 'sEMAILADMIN', 'finishers', $this->utilityFuncs->prepareClassName('\Typoheads\Formhandler\Finisher\Mail')],
@@ -1087,9 +1086,9 @@ class Form extends AbstractController
         $session->start();
         $this->globals->setSession($session);
 
-        $action = GeneralUtility::_GP('action');
+        $action = $GLOBALS['TYPO3_REQUEST']->getParsedBody()['action'] ?? $GLOBALS['TYPO3_REQUEST']->getQueryParams()['action'] ?? null;
         if ($this->globals->getFormValuesPrefix()) {
-            $temp = GeneralUtility::_GP($this->globals->getFormValuesPrefix());
+            $temp = $GLOBALS['TYPO3_REQUEST']->getParsedBody()[$this->globals->getFormValuesPrefix()] ?? $GLOBALS['TYPO3_REQUEST']->getQueryParams()[$this->globals->getFormValuesPrefix()] ?? null;
             $action = $temp['action'] ?? null;
         }
         if ($this->globals->getSession()->get('finished') && !$action) {
@@ -1480,7 +1479,7 @@ class Form extends AbstractController
                 if (!isset($newGP[$field]) && isset($this->gp[$field]) && $this->lastStep < $this->currentStep) {
                     $this->gp[$field] = $newGP[$field] = [];
 
-                //Insert default checkbox values
+                    //Insert default checkbox values
                 } elseif (!isset($newGP[$field]) && $this->lastStep < $this->currentStep) {
                     if (is_array($this->settings['checkBoxUncheckedValue.'] ?? null) && isset($this->settings['checkBoxUncheckedValue.'][$field])) {
                         $this->gp[$field] = $newGP[$field] = $this->utilityFuncs->getSingle($this->settings['checkBoxUncheckedValue.'], $field);

@@ -26,7 +26,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class ClearSession extends AbstractPreProcessor
 {
-
     /**
      * The main method called by the controller
      *

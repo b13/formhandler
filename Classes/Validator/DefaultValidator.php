@@ -49,7 +49,7 @@ class DefaultValidator extends AbstractValidator
      * @param array The GET/POST values
      * @param array The TypoScript configuration
      */
-    public function init($gp, $tsConfig)
+    public function init($gp, $tsConfig): void
     {
         $this->settings = $tsConfig;
 
@@ -229,7 +229,7 @@ class DefaultValidator extends AbstractValidator
                     continue;
                 }
                 $classNameFix = ucfirst($check['check']);
-                if (strpos($classNameFix, 'Tx_') === false && strpos($classNameFix, '\\') === false) {
+                if (!str_contains($classNameFix, 'Tx_')   && !str_contains($classNameFix, '\\')) {
                     $errorCheckObject = $this->componentManager->getComponent($this->utilityFuncs->prepareClassName('\\Typoheads\\Formhandler\\Validator\\ErrorCheck\\' . $classNameFix));
                     $fullClassName = $this->utilityFuncs->prepareClassName('\\Typoheads\\Formhandler\\Validator\\ErrorCheck\\' . $classNameFix);
                 } else {
@@ -263,7 +263,7 @@ class DefaultValidator extends AbstractValidator
         return $errors;
     }
 
-    public function validateConfig()
+    public function validateConfig(): void
     {
         if (is_array($this->settings['fieldConf.'] ?? null)) {
             $fieldConf = $this->settings['fieldConf.'];

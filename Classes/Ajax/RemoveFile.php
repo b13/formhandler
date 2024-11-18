@@ -67,7 +67,7 @@ class RemoveFile
     /**
      * Main method of the class.
      */
-    public function main()
+    public function main(): void
     {
         $this->init();
         $content = '';
@@ -143,11 +143,11 @@ class RemoveFile
         $this->utilityFuncs = GeneralUtility::makeInstance(\Typoheads\Formhandler\Utility\GeneralUtility::class);
         $this->utilityFuncs->initializeTSFE($this->id);
         $this->globals->setCObj($GLOBALS['TSFE']->cObj);
-        $randomID = htmlspecialchars(GeneralUtility::_GP('randomID'));
+        $randomID = htmlspecialchars($GLOBALS['TYPO3_REQUEST']->getParsedBody()['randomID'] ?? $GLOBALS['TYPO3_REQUEST']->getQueryParams()['randomID'] ?? null);
         $this->globals->setRandomID($randomID);
 
         if (!$this->globals->getSession()) {
-            $ts = $GLOBALS['TSFE']->tmpl->setup['plugin.']['Tx_Formhandler.']['settings.'];
+            $ts = $GLOBALS['TYPO3_REQUEST']->getAttribute('frontend.typoscript')->getSetupArray()['plugin.']['Tx_Formhandler.']['settings.'];
             $sessionClass = $this->utilityFuncs->getPreparedClassName($ts['session.'], 'Session\\PHP');
             $this->globals->setSession($this->componentManager->getComponent($sessionClass));
         }

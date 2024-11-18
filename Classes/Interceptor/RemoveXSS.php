@@ -21,7 +21,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class RemoveXSS extends AbstractInterceptor
 {
-
     /**
      * The main method called by the controller
      *
@@ -179,7 +178,7 @@ class RemoveXSS extends AbstractInterceptor
     /* (non-PHPdoc)
      * @see Classes/Component/\Typoheads\Formhandler\Component\AbstractComponent#init($gp, $settings)
     */
-    public function init($gp, $settings)
+    public function init($gp, $settings): void
     {
         parent::init($gp, $settings);
         $this->doNotSanitizeFields = [];

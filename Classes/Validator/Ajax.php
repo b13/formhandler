@@ -19,7 +19,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class Ajax extends AbstractValidator
 {
-
     /**
      * Array holding the configured validators
      *
@@ -125,7 +124,7 @@ class Ajax extends AbstractValidator
                     }
 
                     $classNameFix = ucfirst($check['check']);
-                    if (strpos($classNameFix, 'Tx_') === false) {
+                    if (!str_contains($classNameFix, 'Tx_')) {
                         $errorCheckObject = $this->componentManager->getComponent('\\Typoheads\\Formhandler\\Validator\\ErrorCheck\\' . $classNameFix);
                         $fullClassName = '\\Typoheads\\\Formhandler\\Validator\\ErrorCheck\\' . $classNameFix;
                     } else {
@@ -157,7 +156,7 @@ class Ajax extends AbstractValidator
         return empty($errors);
     }
 
-    public function loadConfig()
+    public function loadConfig(): void
     {
         $tsConfig = $this->globals->getSession()->get('settings');
         $this->settings = [];

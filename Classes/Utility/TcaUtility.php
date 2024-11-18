@@ -4,6 +4,8 @@ namespace Typoheads\Formhandler\Utility;
 
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Http\ServerRequest;
+use TYPO3\CMS\Core\Schema\Struct\SelectItem;
+use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\TypoScript\ExtendedTemplateService;
 use TYPO3\CMS\Core\Utility\DebugUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
@@ -131,66 +133,37 @@ class TcaUtility
                 $pid = $row['pid'];
             }
         }
-        $ts = $this->loadTS($pid);
 
-        $predef = [];
+        $site = GeneralUtility::makeInstance(SiteFinder::class)->getSiteByPageId($pid);
+        $sitePredefinedForms = $site->getSettings()->getAll()['formhandler']['forms'];
 
-        // no config available
-        if (!is_array($ts['plugin.']['Tx_Formhandler.']['settings.']['predef.']) || count($ts['plugin.']['Tx_Formhandler.']['settings.']['predef.']) === 0) {
-            $optionList[] = [
-                0 => $GLOBALS['LANG']->sL('LLL:EXT:formhandler/Resources/Private/Language/locallang_db.xlf:be_missing_config'),
-                1 => '',
+        if (!$sitePredefinedForms) {
+            $config['items'] = [
+                (new SelectItem(
+                    'select',
+                    $GLOBALS['LANG']->sL('LLL:EXT:formhandler/Resources/Private/Language/locallang_db.xlf:be_missing_config'),
+                    ''
+                ))->toArray()
             ];
-            return $config['items'] = array_merge($config['items'], $optionList);
+
+            return $config;
         }
 
-        // for each view
-        foreach ($ts['plugin.']['Tx_Formhandler.']['settings.']['predef.'] as $key => $view) {
-            if (is_array($view)) {
-                $beName = $view['name'];
-                if (isset($view['name.']['data'])) {
-                    $data = explode(':', $view['name.']['data']);
-                    if (strtolower($data[0]) === 'lll') {
-                        array_shift($data);
-                    }
-                    $langFileAndKey = implode(':', $data);
-                    $beName = $GLOBALS['LANG']->sL('LLL:' . $langFileAndKey);
-                }
-                if (!isset($predef[$key])) {
-                    $predef[$key] = $beName;
-                }
-            }
+        $config['items'][] =
+            (new SelectItem(
+                'select',
+                $GLOBALS['LANG']->sL('LLL:EXT:formhandler/Resources/Private/Language/locallang_db.xlf:be_please_select'),
+                ''
+            ))->toArray();
+
+        foreach ($sitePredefinedForms as $form) {
+            $config['items'][] = (new SelectItem(
+                'select',
+                $form['label'],
+                $form['value'],
+            ))->toArray();
         }
 
-        $optionList = [
-            [
-                0 => $GLOBALS['LANG']->sL('LLL:EXT:formhandler/Resources/Private/Language/locallang_db.xlf:be_please_select'),
-                1 => '',
-            ],
-        ];
-        foreach ($predef as $k => $v) {
-            $optionList[] = [
-                0 => $v,
-                1 => $k,
-            ];
-        }
-        $config['items'] = array_merge($config['items'], $optionList);
         return $config;
-    }
-
-    /**
-     * Loads the TypoScript for the current page
-     *
-     * @param int $pageUid
-     * @return array The TypoScript setup
-     */
-    public function loadTS($pageUid)
-    {
-        $rootLine = GeneralUtility::makeInstance(RootlineUtility::class, $pageUid)->get();
-        $TSObj = GeneralUtility::makeInstance(ExtendedTemplateService::class);
-        $TSObj->tt_track = false;
-        $TSObj->runThroughTemplates($rootLine);
-        $TSObj->generateConfig();
-        return $TSObj->setup;
     }
 }

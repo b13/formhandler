@@ -59,7 +59,7 @@ class IsInDBTable extends AbstractErrorCheck
                     $queryBuilder->getRestrictions()->removeByType(HiddenRestriction::class);
                 }
 
-                $stmt = $queryBuilder->execute();
+                $stmt = $queryBuilder->executeQuery();
                 if ($stmt && $stmt->rowCount() === 0) {
                     $checkFailed = $this->getCheckFailed();
                 } elseif (!$stmt) {

@@ -73,8 +73,8 @@ class Submit
             ->where(
                 $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($elementUID, \PDO::PARAM_INT))
             )
-            ->execute()
-            ->fetch();
+            ->executeQuery()
+            ->fetchAssociative();
         if (!empty($row)) {
             $GLOBALS['TSFE']->cObj->data = $row;
             $GLOBALS['TSFE']->cObj->current = 'tt_content_' . $elementUID;

@@ -187,7 +187,7 @@ class DB extends AbstractFinisher
             $queryBuilder->andWhere($andWhere);
         }
 
-        $row = $queryBuilder->execute()->fetch();
+        $row = $queryBuilder->executeQuery()->fetchAssociative();
         if (is_array($row)) {
             return true;
         }
@@ -197,13 +197,13 @@ class DB extends AbstractFinisher
     protected function doInsert($queryFields)
     {
         $queryBuilder = $this->getConnection()->createQueryBuilder();
-        $queryBuilder->insert($this->table);
-
-        $queryBuilder->values($queryFields);
+        $queryBuilder
+            ->insert($this->table)
+            ->values($queryFields);
 
         $this->utilityFuncs->debugMessage('sql_request', [$queryBuilder->getSQL()]);
 
-        $stmt = $queryBuilder->execute();
+        $stmt = $queryBuilder->executeStatement();
 
         if (is_object($stmt) && $stmt->errorInfo()) {
             $this->utilityFuncs->debugMessage('error', [$stmt->errorInfo()], 3);
@@ -233,10 +233,9 @@ class DB extends AbstractFinisher
             $queryBuilder->andWhere($andWhere);
         }
 
-        $query = $queryBuilder->getSQL();
-        $this->utilityFuncs->debugMessage('sql_request', [$query]);
+        $this->utilityFuncs->debugMessage('sql_request', [$queryBuilder->getSQL()]);
 
-        $stmt = $queryBuilder->execute();
+        $stmt = $queryBuilder->executeStatement();
         if (is_object($stmt) && $stmt->errorInfo()) {
             $this->utilityFuncs->debugMessage('error', [$stmt->errorInfo()], 3);
             return false;

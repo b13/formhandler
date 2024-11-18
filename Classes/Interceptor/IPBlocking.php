@@ -108,7 +108,7 @@ class IPBlocking extends AbstractInterceptor
                 $queryBuilder->expr()->eq('ip', $queryBuilder->createNamedParameter(GeneralUtility::getIndpEnv('REMOTE_ADDR')))
             );
         }
-        $stmt = $queryBuilder->execute();
+        $stmt = $queryBuilder->executeQuery();
         if ($stmt && $stmt->rowCount() >= $maxValue) {
             $this->log(true);
             $message = 'You are not allowed to send more mails because the form got submitted too many times ';
@@ -117,7 +117,7 @@ class IPBlocking extends AbstractInterceptor
             }
             $message .= 'in the last ' . $value . ' ' . $unit . '!';
             if ($this->settings['report.']['email']) {
-                $rows = $stmt->fetchAll();
+                $rows = $stmt->fetchAllAssociative();
                 $intervalValue = $this->utilityFuncs->getSingle($this->settings['report.']['interval.'], 'value');
                 $intervalUnit = $this->utilityFuncs->getSingle($this->settings['report.']['interval.'], 'unit');
                 $send = false;
@@ -139,7 +139,7 @@ class IPBlocking extends AbstractInterceptor
                             $queryBuilder->expr()->eq('ip', $queryBuilder->createNamedParameter(GeneralUtility::getIndpEnv('REMOTE_ADDR')))
                         );
                     }
-                    if ($queryBuilder->execute()->fetchColumn() > 0) {
+                    if ($queryBuilder->executeQuery()->fetchColumn() > 0) {
                         $send = true;
                     }
                 } else {

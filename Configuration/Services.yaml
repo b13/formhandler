@@ -6,3 +6,8 @@ services:
 
   Typoheads\Formhandler\:
     resource: '../Classes/*'
+    exclude:
+      - '../Classes/Domain/Model/*'
+      - '../Classes/Utility/*'
+      - '../Classes/Ajax/*'
+      - '../Classes/Http/*'

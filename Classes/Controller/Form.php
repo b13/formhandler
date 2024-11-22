@@ -1165,7 +1165,7 @@ class Form extends AbstractController
         $this->globals->setGP($this->gp);
 
         //init ajax
-        if ($this->settings['ajax.']) {
+        if (isset($this->settings['ajax.'])) {
             $class = $this->utilityFuncs->getPreparedClassName($this->settings['ajax.'], 'AjaxHandler\JQuery');
             $this->utilityFuncs->debugMessage('using_ajax', [$class]);
             $ajaxHandler = $this->componentManager->getComponent($class);

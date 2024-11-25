@@ -157,9 +157,9 @@ class BackendCsv extends AbstractComponent
      */
     private function getInputCharset()
     {
-        if (is_object($GLOBALS['LANG']) && $GLOBALS['LANG']->charSet) {
+        if (is_object($GLOBALS['LANG']) && isset($GLOBALS['LANG']->charSet)) {
             $charset = $GLOBALS['LANG']->charSet;
-        } elseif ($GLOBALS['TYPO3_CONF_VARS']['BE']['forceCharset']) {
+        } elseif (isset($GLOBALS['TYPO3_CONF_VARS']['BE']['forceCharset'])) {
             $charset = $GLOBALS['TYPO3_CONF_VARS']['BE']['forceCharset'];
         } else {
             $charset = 'utf-8';

@@ -1,8 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Typoheads\Formhandler\Controller;
 
+use B13\Formdata\Domain\Repository\FormDataRepository;
+use B13\Formdata\Service\FormdataService;
 use Psr\Http\Message\ResponseInterface;
+use TYPO3\CMS\Backend\Template\ModuleTemplate;
+use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
+use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
@@ -25,61 +32,36 @@ use Typoheads\Formhandler\Generator\BackendCsv;
  *
  * The TYPO3 project - inspiring people to share!
  */
+
 class ModuleController extends ActionController
 {
-    /**
-     * The request arguments
-     *
-     * @var array
-     */
-    protected $gp;
+    protected array $gp;
+    protected ModuleTemplate $moduleTemplate;
+    protected \Typoheads\Formhandler\Utility\GeneralUtility $utilityFuncs;
 
-    /**
-     * The Formhandler component manager
-     *
-     * @var Manager
-     */
-    protected $componentManager;
-
-    /**
-     * The Formhandler utility funcs
-     *
-     * @var \Typoheads\Formhandler\Utility\GeneralUtility
-     */
-    protected $utilityFuncs;
-
-    /**
-     * @var LogDataRepository
-     */
-    protected $logDataRepository;
-
-    public function __construct(LogDataRepository $logDataRepository)
-    {
-        $this->logDataRepository = $logDataRepository;
+    public function __construct(
+        protected ModuleTemplateFactory $moduleTemplateFactory,
+        protected IconFactory $iconFactory,
+        protected PageRenderer $pageRenderer,
+        protected LogDataRepository $logDataRepository,
+        protected Manager $componentManager
+    ) {
+        $this->utilityFuncs = GeneralUtility::makeInstance(\Typoheads\Formhandler\Utility\GeneralUtility::class);
     }
 
-    /**
-     * @var PageRenderer
-     */
-    protected $pageRenderer;
-
-    /**
-     * init all actions
-     */
     public function initializeAction(): void
     {
-        $this->id = (int)($_GET['id']);
+        $this->moduleTemplate = $this->moduleTemplateFactory->create($this->request);
 
+        $this->id = (int)$this->request->getQueryParams()['id'];
         $this->gp = $this->request->getArguments();
-        $this->componentManager = GeneralUtility::makeInstance(Manager::class);
-        $this->utilityFuncs = GeneralUtility::makeInstance(\Typoheads\Formhandler\Utility\GeneralUtility::class);
-        $this->pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
-
-        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/DateTimePicker');
+        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Modal');
+        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Formhandler/FormhandlerModule');
 
         if (!isset($this->settings['dateFormat'])) {
-            $this->settings['dateFormat'] = $GLOBALS['TYPO3_CONF_VARS']['SYS']['USdateFormat'] ? 'm-d-Y' : 'd-m-Y';
+            $this->settings['dateFormat'] = isset($GLOBALS['TYPO3_CONF_VARS']['SYS']['USdateFormat']) ? 'm-d-Y' : 'd-m-Y';
         }
+
         if (!isset($this->settings['timeFormat'])) {
             $this->settings['timeFormat'] = $GLOBALS['TYPO3_CONF_VARS']['SYS']['hhmm'];
         }
@@ -94,46 +76,6 @@ class ModuleController extends ActionController
                 true
             );
         }
-        // or just allow certain properties
-        //$propertyMappingConfiguration->allowProperties('firstname');
-    }
-
-    protected function setStartAndEndTimeFromTimeSelector(Demand $demand)
-    {
-        $startTime = $demand->getManualDateStart() ? $demand->getManualDateStart()->getTimestamp() : 0;
-        $endTime = $demand->getManualDateStop() ? $demand->getManualDateStop()->getTimestamp() : 0;
-        $demand->setStartTimestamp($startTime);
-        $demand->setEndTimestamp($endTime);
-    }
-
-    /**
-     * Prepares information for the pagination of the module
-     */
-    protected function preparePagination(Demand $demand): array
-    {
-        $count = $this->logDataRepository->countRedirectsByByDemand($demand);
-        $numberOfPages = ceil($count / $demand->getLimit());
-        $endRecord = $demand->getOffset() + $demand->getLimit();
-        if ($endRecord > $count) {
-            $endRecord = $count;
-        }
-
-        $pagination = [
-            'count' => $count,
-            'current' => $demand->getPage(),
-            'numberOfPages' => $numberOfPages,
-            'hasLessPages' => $demand->getPage() > 1,
-            'hasMorePages' => $demand->getPage() < $numberOfPages,
-            'startRecord' => $demand->getOffset() + 1,
-            'endRecord' => $endRecord,
-        ];
-        if ($pagination['current'] < $pagination['numberOfPages']) {
-            $pagination['nextPage'] = $pagination['current'] + 1;
-        }
-        if ($pagination['current'] > 1) {
-            $pagination['previousPage'] = $pagination['current'] - 1;
-        }
-        return $pagination;
     }
 
     /**
@@ -153,35 +95,30 @@ class ModuleController extends ActionController
         $this->setStartAndEndTimeFromTimeSelector($demand);
 
         $logDataRows = $this->logDataRepository->findDemanded($demand);
-        $this->view->assign('demand', $demand);
-        $this->view->assign('logDataRows', $logDataRows);
-        $this->view->assign('settings', $this->settings);
         $pagination = $this->preparePagination($demand);
-        $this->view->assign('pagination', $pagination);
-        $permissions = [];
-        $this->view->assign('permissions', $permissions);
-        return $this->htmlResponse();
+        $this->moduleTemplate->assign('demand', $demand);
+        $this->moduleTemplate->assign('logDataRows', $logDataRows);
+        $this->moduleTemplate->assign('settings', $this->settings);
+        $this->moduleTemplate->assign('pagination', $pagination);
+        $this->moduleTemplate->assign('permissions', []);
+        return $this->moduleTemplate->renderResponse('index');
     }
 
     public function viewAction(?LogData $logDataRow = null): ResponseInterface
     {
         if ($logDataRow !== null) {
             $logDataRow->setParams(unserialize($logDataRow->getParams()));
-            $this->view->assign('data', $logDataRow);
-            $this->view->assign('settings', $this->settings);
+            $this->moduleTemplate->assign('data', $logDataRow);
+            $this->moduleTemplate->assign('settings', $this->settings);
         }
-        return $this->htmlResponse();
+
+        return $this->moduleTemplate->renderResponse('view');
     }
 
-    /**
-     * Displays fields selector
-     * @param string uids to export
-     * @param string export file type (PDF || CSV)
-     */
-    public function selectFieldsAction($logDataUids = null, $filetype = ''): ResponseInterface
+    public function selectFieldsAction(string $logDataUids = null, string $filetype = ''): ResponseInterface
     {
         if ($logDataUids !== null) {
-            if ($this->settings[$filetype]['config']['fields']) {
+            if (isset($this->settings[$filetype]['config']['fields'])) {
                 $fields = GeneralUtility::trimExplode(',', $this->settings[$filetype]['config']['fields']);
                 return $this->redirect(
                     'export',
@@ -229,10 +166,12 @@ class ModuleController extends ActionController
                     }
                 }
             }
-            $this->view->assign('fields', $fields);
-            $this->view->assign('logDataUids', $logDataUids);
-            $this->view->assign('filetype', $filetype);
-            $this->view->assign('settings', $this->settings);
+            $this->moduleTemplate->assign('fields', $fields);
+            $this->moduleTemplate->assign('logDataUids', $logDataUids);
+            $this->moduleTemplate->assign('filetype', $filetype);
+            $this->moduleTemplate->assign('settings', $this->settings);
+
+            return $this->moduleTemplate->renderResponse('selectFields');
         }
     }
 
@@ -282,8 +221,41 @@ class ModuleController extends ActionController
         return $this->htmlResponse();
     }
 
-    public function injectLogDataRepository(LogDataRepository $logDataRepository): void
+    protected function setStartAndEndTimeFromTimeSelector(Demand $demand)
     {
-        $this->logDataRepository = $logDataRepository;
+        $startTime = $demand->getManualDateStart() ? $demand->getManualDateStart()->getTimestamp() : 0;
+        $endTime = $demand->getManualDateStop() ? $demand->getManualDateStop()->getTimestamp() : 0;
+        $demand->setStartTimestamp($startTime);
+        $demand->setEndTimestamp($endTime);
+    }
+
+    /**
+     * Prepares information for the pagination of the module
+     */
+    protected function preparePagination(Demand $demand): array
+    {
+        $count = $this->logDataRepository->countRedirectsByByDemand($demand);
+        $numberOfPages = ceil($count / $demand->getLimit());
+        $endRecord = $demand->getOffset() + $demand->getLimit();
+        if ($endRecord > $count) {
+            $endRecord = $count;
+        }
+
+        $pagination = [
+            'count' => $count,
+            'current' => $demand->getPage(),
+            'numberOfPages' => $numberOfPages,
+            'hasLessPages' => $demand->getPage() > 1,
+            'hasMorePages' => $demand->getPage() < $numberOfPages,
+            'startRecord' => $demand->getOffset() + 1,
+            'endRecord' => $endRecord,
+        ];
+        if ($pagination['current'] < $pagination['numberOfPages']) {
+            $pagination['nextPage'] = $pagination['current'] + 1;
+        }
+        if ($pagination['current'] > 1) {
+            $pagination['previousPage'] = $pagination['current'] - 1;
+        }
+        return $pagination;
     }
 }

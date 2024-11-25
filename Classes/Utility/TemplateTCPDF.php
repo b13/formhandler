@@ -54,7 +54,7 @@ class TemplateTCPDF extends \TCPDF
     public function Header(): void
     {
         $headerText = $this->getHeaderText();
-        if (strlen($headerText) > 0) {
+        if (strlen($headerText ?? '') > 0) {
             $this->SetY(5);
 
             $text = str_ireplace(
@@ -83,7 +83,7 @@ class TemplateTCPDF extends \TCPDF
 
         $footerText = $this->getFooterText();
 
-        if (strlen($footerText) > 0) {
+        if (strlen($footerText ?? '') > 0) {
             $footerText = str_ireplace(
                 [
                     '###PDF_PAGE_NUMBER###',

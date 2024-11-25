@@ -48,10 +48,13 @@ class LogDataRepository extends Repository
         foreach ($uidArray as $key => $value) {
             $uidConstraints[] = $query->equals('uid', $value);
         }
+
         return $query->matching(
-            $query->logicalAnd([$query->equals('deleted', 0), $query->logicalOr(
-                $uidConstraints
-            )])
+            $query->logicalAnd(
+                $query->equals('deleted', 0),
+                $query->logicalOr(
+                    ...$uidConstraints
+                ))
         )->execute();
     }
 
@@ -85,7 +88,7 @@ class LogDataRepository extends Repository
             $constraints[] = $query->lessThan('tstamp', $demand->getEndTimestamp());
         }
 
-        $query->matching($query->logicalAnd($constraints));
+        $query->matching($query->logicalAnd(...$constraints));
 
         return $query;
     }

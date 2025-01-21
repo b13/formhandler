@@ -60,12 +60,10 @@ class Validate
 
         /** @var TypoScriptFrontendController */
         $controller = $request->getAttribute('frontend.controller');
-        $controller->getConfigArray($request);
-        $controller->newCObj();
 
-        $field = htmlspecialchars($GLOBALS['TYPO3_REQUEST']->getParsedBody()['field'] ?? $GLOBALS['TYPO3_REQUEST']->getQueryParams()['field'] ?? null);
+        $field = htmlspecialchars((string)($GLOBALS['TYPO3_REQUEST']->getParsedBody()['field'] ?? $GLOBALS['TYPO3_REQUEST']->getQueryParams()['field'] ?? null));
         if ($field) {
-            $randomID = htmlspecialchars($GLOBALS['TYPO3_REQUEST']->getParsedBody()['randomID'] ?? $GLOBALS['TYPO3_REQUEST']->getQueryParams()['randomID'] ?? null);
+            $randomID = htmlspecialchars((string)($GLOBALS['TYPO3_REQUEST']->getParsedBody()['randomID'] ?? $GLOBALS['TYPO3_REQUEST']->getQueryParams()['randomID'] ?? null));
             Globals::setCObj($GLOBALS['TSFE']->cObj);
             Globals::setRandomID($randomID);
             if (!Globals::getSession()) {

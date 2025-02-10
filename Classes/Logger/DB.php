@@ -2,7 +2,9 @@
 
 namespace Typoheads\Formhandler\Logger;
 
+use Psr\Http\Message\RequestInterface;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /*                                                                        *
@@ -86,8 +88,18 @@ class DB extends AbstractLogger
             $fields['is_spam'] = 1;
         }
 
+        $request = $this->getRequest();
+        if ($request !== null) {
+            /** @var SiteLanguage $language */
+            $language = $request->getAttribute('language');
+            if ($language !== null) {
+                $fields['language'] = $language->getLanguageId();
+            }
+        }
+
         //query the database
         $conn = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table);
+
 
         $conn->insert($table, $fields);
         $insertedUID = (int)$conn->lastInsertId($table);
@@ -147,5 +159,10 @@ class DB extends AbstractLogger
             }
         }
         return $sortedParams;
+    }
+
+    protected function getRequest(): ?RequestInterface
+    {
+        return $GLOBALS['TYPO3_REQUEST'] ?? null;
     }
 }

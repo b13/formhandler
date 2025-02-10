@@ -91,6 +91,9 @@ class BackendCsv extends AbstractComponent
             if (count($exportParams) == 0 || in_array('ip', $exportParams)) {
                 $record['params']['ip'] = $record['ip'];
             }
+            if (count($exportParams) == 0 || in_array('language', $exportParams)) {
+                $record['params']['language'] = $record['language'];
+            }
             $data[] = $record['params'];
         }
         if (count($exportParams) > 0) {

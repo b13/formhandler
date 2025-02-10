@@ -42,6 +42,9 @@
 			<trans-unit id="label.show" resname="label.show" >
 				<source>Items per page</source>
 			</trans-unit>
+			<trans-unit id="label.language" resname="label.language" >
+				<source>Language</source>
+			</trans-unit>
 			<trans-unit id="label.submit" resname="label.submit" >
 				<source>Filter</source>
 			</trans-unit>

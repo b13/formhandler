@@ -76,6 +76,9 @@ class LogDataRepository extends Repository
         if ($demand->getPid() > 0) {
             $constraints[] = $query->equals('pid', $demand->getPid());
         }
+        if ($demand->getLanguage() > -1) {
+            $constraints[] = $query->equals('language', $demand->getLanguage());
+        }
 
         if (strlen($demand->getIp()) > 0) {
             $constraints[] = $query->equals('ip', $demand->getIp());

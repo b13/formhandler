@@ -84,6 +84,9 @@
 			<trans-unit id="tx_formhandler_log.is_spam" resname="tx_formhandler_log.is_spam" >
 				<source>Considered as SPAM</source>
 			</trans-unit>
+			<trans-unit id="tx_formhandler_log.language" resname="tx_formhandler_log.language" >
+				<source>Language</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

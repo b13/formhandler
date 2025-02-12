@@ -45,6 +45,9 @@ class LogData extends AbstractEntity
      */
     protected $isSpam = 0;
 
+    protected int $language = -1;
+    protected string $languageTitle = '-';
+
     public function getCrdate()
     {
         return $this->crdate;
@@ -83,5 +86,25 @@ class LogData extends AbstractEntity
     public function setIsSpam($isSpam): void
     {
         $this->isSpam = $isSpam;
+    }
+
+    public function getLanguage(): int
+    {
+        return $this->language;
+    }
+
+    public function setLanguage(int $language): void
+    {
+        $this->language = $language;
+    }
+
+    public function getLanguageTitle(): string
+    {
+        return $this->languageTitle;
+    }
+
+    public function setLanguageTitle(string $languageTitle): void
+    {
+        $this->languageTitle = $languageTitle;
     }
 }

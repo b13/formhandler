@@ -59,6 +59,8 @@ class Demand
 
     protected $limit = 10;
 
+    protected int $language = -1;
+
     /**
      * @return string|null
      */
@@ -169,6 +171,7 @@ class Demand
         if ($this->getLimit()) {
             $parameters['limit'] = $this->getLimit();
         }
+
         return $parameters;
     }
 
@@ -210,5 +213,15 @@ class Demand
     public function getManualDateStop()
     {
         return $this->manualDateStop;
+    }
+
+    public function getLanguage(): int
+    {
+        return $this->language;
+    }
+
+    public function setLanguage(int $language): void
+    {
+        $this->language = $language;
     }
 }

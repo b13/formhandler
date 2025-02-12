@@ -85,6 +85,13 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="tx_formhandler_logdata_language">
+                            <f:translate key="label.language"/>
+                        </label>
+                        <f:form.select id="tx_formhandler_logdata_language" class="form-control" name="show" property="language" options="{siteLanguages}" prependOptionLabel="-" prependOptionValue="-1"/>
+                    </div>
+
+                    <div class="form-group">
                         <f:form.submit value="{f:translate(key: 'label.submit')}" class="btn btn-default btn-sm"/>
                     </div>
                 </f:form>

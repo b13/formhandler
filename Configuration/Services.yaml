@@ -11,3 +11,6 @@ services:
       - '../Classes/Utility/*'
       - '../Classes/Ajax/*'
       - '../Classes/Http/*'
+
+  Typoheads\Formhandler\Utility\TcaSiteLanguagesProcFunc:
+    public: true

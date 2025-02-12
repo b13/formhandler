@@ -21,6 +21,9 @@ return [
             'ip' => [
                 'fieldName' => 'ip',
             ],
+            'language' => [
+                'fieldName' => 'language',
+            ],
         ],
     ],
     Demand::class => [

@@ -43,6 +43,16 @@ return [
                 'type' => 'check',
             ],
         ],
+        'language' => [
+            'exclude' => 1,
+            'label' => 'LLL:EXT:formhandler/Resources/Private/Language/locallang_db.xlf:tx_formhandler_log.language',
+            'config' => [
+                'type' => 'select',
+                'renderType' => 'selectSingle',
+                'itemsProcFunc' => \Typoheads\Formhandler\Utility\TcaSiteLanguagesProcFunc::class . '->getItems',
+                'items' => [],
+            ],
+        ],
         'uid' => [
             'label' => '',
             'config' => [
@@ -76,7 +86,7 @@ return [
     ],
     'types' => [
         '0' => [
-            'showitem' => 'crdate,ip,params,is_spam',
+            'showitem' => 'crdate,ip,params,is_spam,language',
         ],
     ],
 ];

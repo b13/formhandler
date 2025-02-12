@@ -7,6 +7,7 @@ CREATE TABLE tx_formhandler_log (
 	tstamp int(11) unsigned DEFAULT '0' NOT NULL,
 	crdate int(11) unsigned DEFAULT '0' NOT NULL,
 	deleted int(11) unsigned DEFAULT '0' NOT NULL,
+	language int(11) DEFAULT '-1' NOT NULL,
 	ip tinytext,
 	params mediumtext,
 	is_spam int(11) unsigned DEFAULT '0',

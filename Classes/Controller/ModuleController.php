@@ -11,6 +11,7 @@ use TYPO3\CMS\Backend\Template\ModuleTemplate;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Page\PageRenderer;
+use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 use TYPO3\CMS\Extbase\Property\TypeConverter\PersistentObjectConverter;
@@ -44,8 +45,10 @@ class ModuleController extends ActionController
         protected IconFactory $iconFactory,
         protected PageRenderer $pageRenderer,
         protected LogDataRepository $logDataRepository,
-        protected Manager $componentManager
-    ) {
+        protected Manager $componentManager,
+        protected SiteFinder $siteFinder
+    )
+    {
         $this->utilityFuncs = GeneralUtility::makeInstance(\Typoheads\Formhandler\Utility\GeneralUtility::class);
     }
 
@@ -92,11 +95,20 @@ class ModuleController extends ActionController
         if ($page !== null) {
             $demand->setPage($page);
         }
+
         $this->setStartAndEndTimeFromTimeSelector($demand);
+        $siteLanguages = [];
+        if ($demand->getPid() > 0) {
+            $site = $this->siteFinder->getSiteByPageId($demand->getPid());
+            foreach ($site->getLanguages() as $language) {
+                $siteLanguages[$language->getLanguageId()] = $language->getTitle();
+            }
+        }
 
         $logDataRows = $this->logDataRepository->findDemanded($demand);
         $pagination = $this->preparePagination($demand);
         $this->moduleTemplate->assign('demand', $demand);
+        $this->moduleTemplate->assign('siteLanguages', $siteLanguages);
         $this->moduleTemplate->assign('logDataRows', $logDataRows);
         $this->moduleTemplate->assign('settings', $this->settings);
         $this->moduleTemplate->assign('pagination', $pagination);
@@ -104,10 +116,25 @@ class ModuleController extends ActionController
         return $this->moduleTemplate->renderResponse('index');
     }
 
+    protected function languageIdToLanguageTitle(LogData $logData): LogData
+    {
+        $pageId = $logData->getPid();
+        $site = $this->siteFinder->getSiteByPageId($pageId);
+        if ($site !== null) {
+            try {
+                $siteLanguage= $site->getLanguageById($logData->getLanguage());
+                $logData->setLanguageTitle($siteLanguage->getTitle());
+            } catch (\InvalidArgumentException $e) {
+            }
+        }
+        return $logData;
+    }
+
     public function viewAction(?LogData $logDataRow = null): ResponseInterface
     {
         if ($logDataRow !== null) {
             $logDataRow->setParams(unserialize($logDataRow->getParams()));
+            $logDataRow = $this->languageIdToLanguageTitle($logDataRow);
             $this->moduleTemplate->assign('data', $logDataRow);
             $this->moduleTemplate->assign('settings', $this->settings);
         }
@@ -136,6 +163,7 @@ class ModuleController extends ActionController
             $fields = [
                 'global' => [
                     'pid',
+                    'language',
                     'ip',
                     'submission_date',
                 ],
@@ -186,9 +214,12 @@ class ModuleController extends ActionController
         if ($logDataUids !== null && !empty($fields)) {
             $logDataRows = $this->logDataRepository->findByUids($logDataUids);
             $convertedLogDataRows = [];
+
             foreach ($logDataRows as $idx => $logDataRow) {
+                $logDataRow = $this->languageIdToLanguageTitle($logDataRow);
                 $convertedLogDataRows[] = [
                     'pid' => $logDataRow->getPid(),
+                    'language' => $logDataRow->getLanguageTitle(),
                     'ip' => $logDataRow->getIp(),
                     'crdate' => $logDataRow->getCrdate(),
                     'params' => unserialize($logDataRow->getParams()),

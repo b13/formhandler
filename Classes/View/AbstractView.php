@@ -42,6 +42,9 @@ abstract class AbstractView extends AbstractPlugin
      */
     public $extKey = 'formhandler';
 
+    protected array $settings = [];
+    protected array $errors = [];
+
     protected ?ContentObjectRenderer $cObj = null;
 
     /**
@@ -60,6 +63,7 @@ abstract class AbstractView extends AbstractPlugin
     protected Configuration $configuration;
     protected Globals $globals;
     protected GeneralUtility $utilityFuncs;
+    protected ?string $predefined = null;
 
     /**
      * The model of the view

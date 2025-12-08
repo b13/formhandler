@@ -36,7 +36,7 @@ class Form extends AbstractController
      *
      * @var array
      */
-    protected $errors;
+    protected $errors = [];
 
     /**
      * Holds the prefix value of all parameters of this form.

@@ -3,7 +3,7 @@
 namespace Typoheads\Formhandler\Finisher;
 
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use Typoheads\Formhandler\Mailer\AbstractMailer;
+use Typoheads\Formhandler\Mailer\MailerInterface;
 
 /*                                                                        *
  * This script is part of the TYPO3 project - inspiring people to share!  *
@@ -69,7 +69,7 @@ use Typoheads\Formhandler\Mailer\AbstractMailer;
  */
 class Mail extends AbstractFinisher
 {
-    protected AbstractMailer $emailObj;
+    protected MailerInterface $emailObj;
     protected ?string $predefined = null;
     /**
      * The main method called by the controller

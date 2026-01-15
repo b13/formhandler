@@ -28,6 +28,8 @@ abstract class AbstractSession extends AbstractClass
      */
     protected $started = false;
 
+    protected array $gp = [];
+
     /**
      * Starts a new session
      */

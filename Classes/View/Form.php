@@ -32,6 +32,8 @@ class Form extends AbstractView
      */
     protected $disableEncodingFields;
 
+    protected ?array $masterTemplates = null;
+
     /**
      * Main method called by the controller.
      *
@@ -64,7 +66,7 @@ class Form extends AbstractView
         }
 
         //read master template
-        if (!isset($this->masterTemplates)) {
+        if ($this->masterTemplates === null) {
             $this->readMasterTemplates();
         }
 

@@ -22,6 +22,9 @@ use Typoheads\Formhandler\Component\AbstractComponent;
  */
 abstract class AbstractInterceptor extends AbstractComponent
 {
+    protected array $doNotSanitizeFields = [];
+    protected array $removeChars = [];
+
     /**
      * Logs an action of an interceptor, e.g. if Interceptor_IPBlocking blocked a request.
      *

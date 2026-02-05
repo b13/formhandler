@@ -4,7 +4,17 @@ if (!defined('TYPO3')) {
     die('Access denied.');
 }
 
-\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addPItoST43('formhandler', 'pi1/class.tx_formhandler_pi1.php', '_pi1', 'CType', false);
+call_user_func(
+    function () {
+        \TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
+            'Formhandler',
+            'Pi1',
+            [\Typoheads\Formhandler\Controller\FormhandlerPluginController::class => 'index'],
+            [\Typoheads\Formhandler\Controller\FormhandlerPluginController::class => 'index'],
+            \TYPO3\CMS\Extbase\Utility\ExtensionUtility::PLUGIN_TYPE_CONTENT_ELEMENT
+        );
+    }
+);
 
 //Hook in tslib_content->stdWrap
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['tslib/class.tslib_content.php']['stdWrap']['formhandler'] = 'Typoheads\Formhandler\Hooks\StdWrapHook';

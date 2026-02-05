@@ -4,8 +4,8 @@ namespace Typoheads\Formhandler\Controller;
 
 use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Frontend\Plugin\AbstractPlugin;
 use Typoheads\Formhandler\Component\Manager;
+use Typoheads\Formhandler\Plugin\AbstractPlugin;
 use Typoheads\Formhandler\Utility\Globals;
 
 /*                                                                        *

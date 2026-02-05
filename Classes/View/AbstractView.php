@@ -2,8 +2,6 @@
 
 namespace Typoheads\Formhandler\View;
 
-use TYPO3\CMS\Core\Service\MarkerBasedTemplateService;
-use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 use Typoheads\Formhandler\Component\Manager;
 use Typoheads\Formhandler\Controller\Configuration;
 use Typoheads\Formhandler\Plugin\AbstractPlugin;
@@ -28,29 +26,9 @@ use Typoheads\Formhandler\Utility\Globals;
  */
 abstract class AbstractView extends AbstractPlugin
 {
-    /**
-     * The prefix id
-     *
-     * @var string
-     */
-    public $prefixId = 'Tx_Formhandler';
-
-    /**
-     * The extension key
-     *
-     * @var string
-     */
-    public $extKey = 'formhandler';
 
     protected array $settings = [];
     protected array $errors = [];
-
-    protected ?ContentObjectRenderer $cObj = null;
-
-    /**
-     * @var MarkerBasedTemplateService
-     */
-    protected $markerBasedTemplateService;
 
     /**
      * The piVars
@@ -110,7 +88,6 @@ abstract class AbstractView extends AbstractPlugin
         $this->globals = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(Globals::class);
         $this->utilityFuncs = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(GeneralUtility::class);
         $this->cObj = $this->globals->getCObj();
-        $this->markerBasedTemplateService = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(MarkerBasedTemplateService::class);
         $this->pi_loadLL();
         $this->initializeView();
     }
@@ -187,8 +164,8 @@ abstract class AbstractView extends AbstractPlugin
      */
     public function setTemplate($templateCode, $templateName, $forceTemplate = false): void
     {
-        $this->subparts['template'] = $this->markerBasedTemplateService->getSubpart($templateCode, '###TEMPLATE_' . $templateName . '###');
-        $this->subparts['item'] = $this->markerBasedTemplateService->getSubpart($this->subparts['template'], '###ITEM###');
+        $this->subparts['template'] = $this->templateService->getSubpart($templateCode, '###TEMPLATE_' . $templateName . '###');
+        $this->subparts['item'] = $this->templateService->getSubpart($this->subparts['template'], '###ITEM###');
     }
 
     /**

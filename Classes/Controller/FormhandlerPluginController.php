@@ -13,8 +13,6 @@ class FormhandlerPluginController extends ActionController
         $dispatcher = new Dispatcher();
         $dispatcher->setRequests($this->request);
         $content = $dispatcher->main('', []);
-        DebuggerUtility::var_dump($content);
-        die('ss');
         return $this->htmlResponse($content);
     }
 

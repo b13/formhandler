@@ -6,18 +6,24 @@ use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Localization\LocalizationFactory;
 use TYPO3\CMS\Core\Service\MarkerBasedTemplateService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\HttpUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
+use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
+use TYPO3\CMS\Frontend\Page\PageInformation;
 
 class AbstractPlugin
 {
     protected ?ContentObjectRenderer $cObj = null;
     protected ?ServerRequestInterface $request = null;
+    protected ?FrontendUserAuthentication $frontendUserAuthentication = null;
+    protected ?PageInformation $pageInformation = null;
     protected MarkerBasedTemplateService $templateService;
 
     public bool $LOCAL_LANG_loaded = false;
     public string $LLkey = 'default';
     public array $LOCAL_LANG = [];
+    public string $prefixId = 'Tx_Formhandler';
 
     public function __construct()
     {
@@ -28,6 +34,8 @@ class AbstractPlugin
     {
         $this->request = $request;
         $this->cObj = $this->request->getAttribute('currentContentObject');
+        $this->frontendUserAuthentication = $this->request->getAttribute('frontend.user');
+        $this->pageInformation = $this->request->getAttribute('frontend.page.information');
     }
 
     public function pi_initPIflexForm($field = 'pi_flexform')
@@ -133,5 +141,53 @@ class AbstractPlugin
             }
         }
         $this->LOCAL_LANG_loaded = true;
+    }
+
+    /***************************
+     *
+     * Link functions
+     *
+     **************************/
+    /**
+     * Get URL to some page.
+     * Returns the URL to page $id with $target and an array of additional url-parameters, $urlParameters
+     * Simple example: $this->pi_getPageLink(123) to get the URL for page-id 123.
+     *
+     * The function basically calls $this->cObj->getTypoLink_URL()
+     *
+     * @param int $id Page id
+     * @param string $target Target value to use. Affects the &type-value of the URL, defaults to current.
+     * @param array|string $urlParameters As an array key/value pairs represent URL parameters to set. Values NOT URL-encoded yet, keys should be URL-encoded if needed. As a string the parameter is expected to be URL-encoded already.
+     * @return string The resulting URL
+     * @see pi_linkToPage()
+     * @see ContentObjectRenderer::createUrl()
+     */
+    public function pi_getPageLink($id, $target = '', $urlParameters = [])
+    {
+        $conf = [
+            'parameter' => $id,
+        ];
+        if ($target) {
+            $conf['target'] = $target;
+            $conf['extTarget'] = $target;
+            $conf['fileTarget'] = $target;
+        }
+        if (is_array($urlParameters)) {
+            if (!empty($urlParameters)) {
+                $conf['additionalParams'] = HttpUtility::buildQueryString($urlParameters, '&');
+            }
+        } else {
+            $conf['additionalParams'] = $urlParameters;
+        }
+        return $this->cObj->createUrl($conf);
+    }
+
+    public function pi_wrapInBaseClass($str)
+    {
+        $content = '<div class="' . str_replace('_', '-', $this->prefixId) . '">
+		' . $str . '
+	</div>
+	';
+        return $content;
     }
 }

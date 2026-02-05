@@ -11,6 +11,7 @@ use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
+use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 
 /*                                                                        *
@@ -323,8 +324,11 @@ class GeneralUtility implements SingletonInterface
                 }
             }
         }
+        $conf = [
+            'parameter' => $redirect,
+        ];
 
-        $url = Globals::getCObj()->getTypoLink_URL($redirect, $addParams);
+        $url = Globals::getCObj()->createUrl($conf);
 
         //correct the URL by replacing &amp;
         if ($correctRedirectUrl) {

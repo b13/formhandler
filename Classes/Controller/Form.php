@@ -294,7 +294,7 @@ class Form extends AbstractController
                         if ((int)($this->utilityFuncs->getSingle($tsConfig, 'disable')) !== 1) {
                             $validator = $this->componentManager->getComponent($className);
                             if ($this->currentStep === $this->lastStep) {
-                                $userSetting = GeneralUtility::trimExplode(',', $this->utilityFuncs->getSingle($tsConfig['config.'], 'restrictErrorChecks'));
+                                $userSetting = GeneralUtility::trimExplode(',', (string)$this->utilityFuncs->getSingle($tsConfig['config.'], 'restrictErrorChecks'));
                                 $autoSetting = [
                                     'fileAllowedTypes',
                                     'fileRequired',
@@ -824,7 +824,7 @@ class Form extends AbstractController
         $data = $this->globals->getSession()->get('values');
 
         $checkBoxFields = $this->utilityFuncs->getSingle($this->settings, 'checkBoxFields');
-        $checkBoxFields = GeneralUtility::trimExplode(',', $checkBoxFields);
+        $checkBoxFields = GeneralUtility::trimExplode(',', (string)$checkBoxFields);
 
         //set the variables in session
         if ($this->lastStep !== $this->currentStep) {

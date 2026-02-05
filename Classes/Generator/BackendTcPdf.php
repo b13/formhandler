@@ -3,6 +3,7 @@
 namespace Typoheads\Formhandler\Generator;
 
 use Typoheads\Formhandler\Component\AbstractComponent;
+use Typoheads\Formhandler\Utility\TemplateTCPDF;
 
 /*                                                                        *
  * This script is part of the TYPO3 project - inspiring people to share!  *
@@ -22,12 +23,7 @@ use Typoheads\Formhandler\Component\AbstractComponent;
  */
 class BackendTcPdf extends AbstractComponent
 {
-    /**
-     * The internal PDF object
-     *
-     * @var Tx_Formhandler_Template_TCPDF
-     */
-    protected $pdf;
+    protected ?TemplateTCPDF $pdf = null;
 
     public function init($gp, $settings): void
     {
@@ -63,13 +59,13 @@ class BackendTcPdf extends AbstractComponent
         $this->settings['font'] = $font;
     }
 
-    public function process(): void
+    public function process(): string
     {
         $records = $this->settings['records'];
         $exportFields = $this->settings['exportFields'];
 
         //init pdf object
-        $this->pdf = $this->componentManager->getComponent('Typoheads\Formhandler\Utility\TemplateTCPDF');
+        $this->pdf = $this->componentManager->getComponent(TemplateTCPDF::class);
         $this->pdf->SetAutoPageBreak(true, PDF_MARGIN_BOTTOM);
 
         $this->pdf->SetFont($this->settings['font'], '', $this->settings['fontSize']);
@@ -171,8 +167,8 @@ class BackendTcPdf extends AbstractComponent
             $this->pdf->Cell(300, 100, 'No valid records found! Try to select more fields to export!', 0, 0, 'L');
         }
 
-        $this->pdf->Output($this->settings['fileName'], 'D');
-        exit;
+        $content = $this->pdf->Output($this->settings['fileName'], 'S');
+        return $content;
     }
 
     /**

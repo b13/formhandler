@@ -1142,7 +1142,7 @@ class GeneralUtility implements SingletonInterface
         return $resourceFiles;
     }
 
-    public static function getConditionResult($condition, $gp)
+    public static function getConditionResult($condition, $gp): bool
     {
         $valueConditions = preg_split('/\s*(!=|\^=|\$=|~=|>=|<=|=|<|>)\s*/', $condition, -1, PREG_SPLIT_DELIM_CAPTURE);
 

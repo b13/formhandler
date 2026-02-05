@@ -2,7 +2,6 @@
 
 namespace Typoheads\Formhandler\Controller;
 
-use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Typoheads\Formhandler\Component\Manager;
 use Typoheads\Formhandler\Plugin\AbstractPlugin;
@@ -47,95 +46,53 @@ class Dispatcher extends AbstractPlugin
      */
     protected $utilityFuncs;
 
-    /**
-     * Main method of the dispatcher. This method is called as a user function.
-     *
-     * @return string rendered view
-     * @param string|null $content
-     * @param array $setup The TypoScript config
-     */
-    public function main($content, $setup)
+    public function main()
     {
         $this->componentManager = GeneralUtility::makeInstance(Manager::class);
         $this->globals = GeneralUtility::makeInstance(Globals::class);
         $this->utilityFuncs = GeneralUtility::makeInstance(\Typoheads\Formhandler\Utility\GeneralUtility::class);
-        try {
 
-            //init flexform
-            $this->pi_initPIflexForm();
+        //init flexform
+        $this->pi_initPIflexForm();
 
-            /*
-             * Parse values from flexform:
-             * - Template file
-             * - Translation file
-             * - Predefined form
-             * - E-mail settings
-             * - Required fields
-             * - Redirect page
-             */
-            $templateFile = $this->pi_getFFvalue($this->cObj->data['pi_flexform'], 'template_file', 'sDEF');
-            $langFile = $this->pi_getFFvalue($this->cObj->data['pi_flexform'], 'lang_file', 'sDEF');
-            $predef = $this->pi_getFFvalue($this->cObj->data['pi_flexform'], 'predefined', 'sDEF');
+        /*
+         * Parse values from flexform:
+         * - Template file
+         * - Translation file
+         * - Predefined form
+         * - E-mail settings
+         * - Required fields
+         * - Redirect page
+         */
+        $templateFile = $this->pi_getFFvalue($this->cObj->data['pi_flexform'], 'template_file', 'sDEF');
+        $langFile = $this->pi_getFFvalue($this->cObj->data['pi_flexform'], 'lang_file', 'sDEF');
+        $predef = $this->pi_getFFvalue($this->cObj->data['pi_flexform'], 'predefined', 'sDEF');
 
-            $this->globals->setCObj($this->cObj);
-            $this->globals->getCObj()->setCurrentVal($predef);
-            if ($setup['usePredef'] ?? false) {
-                $predef = $this->utilityFuncs->getSingle($setup, 'usePredef');
-            }
+        $this->globals->setCObj($this->cObj);
+        $this->globals->getCObj()->setCurrentVal($predef);
+        $this->globals->setPredef($predef);
 
-            $this->globals->setPredef($predef);
-            $this->globals->setOverrideSettings($setup);
+        /*
+         * set controller:
+         * 1. Default controller
+         * 2. TypoScript
+         */
+        $controllerClassName = Form::class;
 
-            /*
-             * set controller:
-             * 1. Default controller
-             * 2. TypoScript
-             */
-            $controllerClassName = 'Typoheads\Formhandler\Controller\Form';
-            if ($setup['controller'] ?? false) {
-                $controllerClassName = $setup['controller'];
-            }
+        /** @var AbstractController $controller */
+        $controller = GeneralUtility::makeInstance($controllerClassName);
 
-            /** @var AbstractController $controller */
-            $controller = GeneralUtility::makeInstance($controllerClassName);
-
-            if (isset($content)) {
-                $controller->setContent($this->componentManager->getComponent($this->utilityFuncs->prepareClassName('Typoheads\Formhandler\Controller\Content'), $content));
-            }
-            if (strlen($templateFile) > 0) {
-                $controller->setTemplateFile($templateFile);
-            }
-            if (strlen($langFile) > 0) {
-                $controller->setLangFiles([$langFile]);
-            }
-            if (strlen($predef) > 0) {
-                $controller->setPredefined($predef);
-            }
-
-            $result = $controller->process();
-        } catch (\Exception $e) {
-            throw $e;
-            GeneralUtility::makeInstance(LogManager::class)->getLogger(__CLASS__)->error(
-                $e->getFile() . '(' . $e->getLine() . ')' . ' ' . $e->getMessage(),
-                ['formhandler']
-            );
-
-            $result = $this->utilityFuncs->getTranslatedMessage($this->globals->getLangFiles(), 'fe-exception');
-            if (!$result) {
-                $result = '<div style="color:red; font-weight: bold">' . $this->utilityFuncs->getExceptionMessage('fe-exception') . '</div>';
-            }
-            if ($this->globals->getSession() && $this->globals->getSession()->get('debug')) {
-                $result = '<div style="color:red; font-weight: bold">' . $e->getMessage() . '</div>';
-                $result .= '<div style="color:red; font-weight: bold">File: ' . $e->getFile() . '(' . $e->getLine() . ')</div>';
-                $result .= '<div style="color:red; font-weight: bold">' . $e->getTraceAsString() . '</div>';
-            }
+        if (strlen($templateFile) > 0) {
+            $controller->setTemplateFile($templateFile);
         }
-        if ($this->globals->getSession() && $this->globals->getSession()->get('debug')) {
-            $debuggers = $this->globals->getDebuggers();
-            foreach ($debuggers as $idx => $debugger) {
-                $debugger->outputDebugLog();
-            }
+        if (strlen($langFile) > 0) {
+            $controller->setLangFiles([$langFile]);
         }
+        if (strlen($predef) > 0) {
+            $controller->setPredefined($predef);
+        }
+
+        $result = $controller->process();
         return $result;
     }
 }

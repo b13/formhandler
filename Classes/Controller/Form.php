@@ -5,6 +5,8 @@ namespace Typoheads\Formhandler\Controller;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Typoheads\Formhandler\Finisher\SubmittedOK;
+use Typoheads\Formhandler\Interceptor\RemoveXSS;
 
 /*                                                                        *
  * This script is part of the TYPO3 project - inspiring people to share!  *
@@ -162,7 +164,7 @@ class Form extends AbstractController
             foreach ($this->settings['finishers.'] as $key => $config) {
                 if (str_contains($key, '.')) {
                     $className = $this->utilityFuncs->getPreparedClassName($config);
-                    if ($className === $this->utilityFuncs->prepareClassName('\Typoheads\Formhandler\Finisher\SubmittedOK') && is_array($config['config.'])) {
+                    if ($className === $this->utilityFuncs->prepareClassName(SubmittedOK::class) && is_array($config['config.'])) {
                         $finisherConf = $config['config.'];
                     }
                 }
@@ -245,7 +247,7 @@ class Form extends AbstractController
         }
 
         //run init interceptors
-        $this->addFormhandlerClass($this->settings['initInterceptors.'], '\Typoheads\Formhandler\Interceptor\RemoveXSS');
+        $this->addFormhandlerClass($this->settings['initInterceptors.'], RemoveXSS::class);
         $output = (string)$this->runClasses($this->settings['initInterceptors.']);
         if (strlen($output) > 0) {
             return $output;
@@ -1100,8 +1102,6 @@ class Form extends AbstractController
         }
         $this->parseConditions();
 
-        $this->initializeDebuggers();
-
         $this->getStepInformation();
 
         $currentStepFromSession = $this->globals->getSession()->get('currentStep');
@@ -1164,16 +1164,6 @@ class Form extends AbstractController
 
         $this->globals->setGP($this->gp);
 
-        //init ajax
-        if (isset($this->settings['ajax.'])) {
-            $class = $this->utilityFuncs->getPreparedClassName($this->settings['ajax.'], 'AjaxHandler\JQuery');
-            $this->utilityFuncs->debugMessage('using_ajax', [$class]);
-            $ajaxHandler = $this->componentManager->getComponent($class);
-            $this->globals->setAjaxHandler($ajaxHandler);
-
-            $ajaxHandler->init($this->settings['ajax.']['config.']);
-            $ajaxHandler->initAjax();
-        }
         if (!isset($this->gp['randomID'])) {
             $this->gp['randomID'] = $this->globals->getRandomID();
         }
@@ -1490,23 +1480,5 @@ class Form extends AbstractController
             }
         }
         return $newGP;
-    }
-
-    /**
-     * Initializes the debuggers set in TS.
-     */
-    protected function initializeDebuggers()
-    {
-        $this->addFormhandlerClass($this->settings['debuggers.'], 'Typoheads\\Formhandler\\Debugger\\PrintToScreen');
-
-        foreach ($this->settings['debuggers.'] as $idx => $options) {
-            if ((int)($this->utilityFuncs->getSingle($options, 'disable')) !== 1) {
-                $debuggerClass = $this->utilityFuncs->getPreparedClassName($options);
-                $debugger = $this->componentManager->getComponent($debuggerClass);
-                $debugger->init($this->gp, $options['config.'] ?? null);
-                $debugger->validateConfig();
-                $this->globals->addDebugger($debugger);
-            }
-        }
     }
 }

@@ -18,6 +18,7 @@ use Typoheads\Formhandler\Domain\Model\Demand;
 use Typoheads\Formhandler\Domain\Model\LogData;
 use Typoheads\Formhandler\Domain\Repository\LogDataRepository;
 use Typoheads\Formhandler\Generator\BackendCsv;
+use Typoheads\Formhandler\Generator\BackendTcPdf;
 
 /*
  * This file is part of the TYPO3 CMS project.
@@ -35,6 +36,7 @@ use Typoheads\Formhandler\Generator\BackendCsv;
 class ModuleController extends ActionController
 {
     protected array $gp;
+    protected int $id = 0;
     protected ModuleTemplate $moduleTemplate;
     protected \Typoheads\Formhandler\Utility\GeneralUtility $utilityFuncs;
 
@@ -52,11 +54,10 @@ class ModuleController extends ActionController
     public function initializeAction(): void
     {
         $this->moduleTemplate = $this->moduleTemplateFactory->create($this->request);
+        $this->pageRenderer->loadJavaScriptModule('@phorax/formhandler/FormhandlerModule.js');
 
-        $this->id = (int)$this->request->getQueryParams()['id'];
+        $this->id = (int)$this->request->getQueryParams()['id'] ?? 0;
         $this->gp = $this->request->getArguments();
-        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Modal');
-        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Formhandler/FormhandlerModule');
 
         if (!isset($this->settings['dateFormat'])) {
             $this->settings['dateFormat'] = isset($GLOBALS['TYPO3_CONF_VARS']['SYS']['USdateFormat']) ? 'm-d-Y' : 'd-m-Y';
@@ -110,7 +111,7 @@ class ModuleController extends ActionController
         $this->moduleTemplate->assign('settings', $this->settings);
         $this->moduleTemplate->assign('pagination', $pagination);
         $this->moduleTemplate->assign('permissions', []);
-        return $this->moduleTemplate->renderResponse('index');
+        return $this->moduleTemplate->renderResponse('Module/Index');
     }
 
     protected function languageIdToLanguageTitle(LogData $logData): LogData
@@ -136,7 +137,7 @@ class ModuleController extends ActionController
             $this->moduleTemplate->assign('settings', $this->settings);
         }
 
-        return $this->moduleTemplate->renderResponse('view');
+        return $this->moduleTemplate->renderResponse('Module/View');
     }
 
     public function selectFieldsAction(?string $logDataUids = null, string $filetype = ''): ResponseInterface
@@ -195,9 +196,8 @@ class ModuleController extends ActionController
             $this->moduleTemplate->assign('logDataUids', $logDataUids);
             $this->moduleTemplate->assign('filetype', $filetype);
             $this->moduleTemplate->assign('settings', $this->settings);
-
-            return $this->moduleTemplate->renderResponse('selectFields');
         }
+        return $this->moduleTemplate->renderResponse('Module/SelectFields');
     }
 
     /**
@@ -223,30 +223,30 @@ class ModuleController extends ActionController
                 ];
             }
             if ($filetype === 'pdf') {
-                $className = $this->utilityFuncs->getPreparedClassName(
-                    $this->settings['pdf'],
-                    '\Typoheads\Formhandler\Generator\BackendTcPdf'
-                );
-
-                $generator = $this->componentManager->getComponent($className);
+                /** @var BackendTcPdf $generator */
+                $generator = $this->componentManager->getComponent(BackendTcPdf::class);
                 $this->settings['pdf']['config']['records'] = $convertedLogDataRows;
                 $this->settings['pdf']['config']['exportFields'] = $fields;
                 $generator->init([], $this->settings['pdf']['config']);
-                $generator->process();
+                $content = $generator->process();
+                return $this->responseFactory->createResponse()
+                    ->withHeader('Content-Type', 'application/pdf')
+                    ->withHeader('Content-Disposition', 'attachment; filename="formhandler.pdf"')
+                    ->withBody($this->streamFactory->createStream($content));
             } elseif ($filetype === 'csv') {
-                $className = $this->utilityFuncs->getPreparedClassName(
-                    $this->settings['csv'],
-                    BackendCsv::class
-                );
-
-                $generator = $this->componentManager->getComponent($className);
+                $generator = $this->componentManager->getComponent(BackendCsv::class);
                 $this->settings['csv']['config']['records'] = $convertedLogDataRows;
                 $this->settings['csv']['config']['exportFields'] = $fields;
                 $generator->init([], $this->settings['csv']['config']);
-                $generator->process();
+                $content = $generator->process();
+                return $this->responseFactory->createResponse()
+                    ->withHeader('Content-Type', 'application/csv')
+                    ->withHeader('Content-Length', (string)strlen($content))
+                    ->withHeader('Content-Disposition', 'attachment; filename="formhandler.csv"')
+                    ->withBody($this->streamFactory->createStream($content));
             }
         }
-        return $this->htmlResponse();
+        return $this->htmlResponse('not found');
     }
 
     protected function setStartAndEndTimeFromTimeSelector(Demand $demand)

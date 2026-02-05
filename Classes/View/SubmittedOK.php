@@ -26,8 +26,6 @@ class SubmittedOK extends Form
      * ###PRINT_LINK###
      * ###PDF_LINK###
      * ###CSV_LINK###
-     *
-     * @return string Template with replaced markers
      */
     protected function fillDefaultMarkers()
     {
@@ -51,6 +49,6 @@ class SubmittedOK extends Form
         }
         $this->fillFEUserMarkers($markers);
         $this->fillFileMarkers($markers);
-        $this->template = $this->markerBasedTemplateService->substituteMarkerArray($this->template, $markers);
+        $this->template = $this->templateService->substituteMarkerArray($this->template, $markers);
     }
 }

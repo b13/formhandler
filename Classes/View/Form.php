@@ -251,10 +251,6 @@ class Form extends AbstractView
 
     /**
      * Use or remove subparts with [IF|ISSET|HAS_TRANSLATION]_[fieldname]=[value] patterns
-     *
-     * @author  Arno Dudek <webmaster@adgrafik.at>
-     * @author  Reinhard Führicht <rf@typoheads.at>
-     * @return    string        substituted HTML content
      */
     protected function substituteConditionalSubparts($type)
     {
@@ -272,7 +268,7 @@ class Form extends AbstractView
                 $operator = null;
                 $finalConditionResult = false;
                 $count = 0;
-
+                $conditionResult = false;
                 foreach ($conditions as $condition) {
                     if ($condition === '||' || $condition === '&&') {
                         $operator = $condition;
@@ -342,7 +338,7 @@ class Form extends AbstractView
         return strlen($translation) > 0;
     }
 
-    protected function handleIfSubpartCondition($condition)
+    protected function handleIfSubpartCondition($condition): bool
     {
         return $this->utilityFuncs->getConditionResult($condition, $this->gp);
     }

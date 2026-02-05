@@ -23,12 +23,7 @@ use Typoheads\Formhandler\Component\AbstractComponent;
  */
 class BackendCsv extends AbstractComponent
 {
-    /**
-     * The internal CSV object
-     *
-     * @var export2CSV
-     */
-    protected $csv;
+    protected ?Csv $csv = null;
 
     public function init($gp, $settings): void
     {
@@ -58,14 +53,7 @@ class BackendCsv extends AbstractComponent
         $this->settings['encoding'] = $encoding;
     }
 
-    /**
-     * Function to generate a CSV file from submitted form values. This function is called by Tx_Formhandler_Controller_Backend
-     *
-     * @param array $records The records to export to CSV
-     * @param array $exportParams A list of fields to export. If not set all fields are exported
-     * @see Tx_Formhandler_Controller_Backend::generateCSV()
-     */
-    public function process(): void
+    public function process(): string
     {
         $records = $this->settings['records'];
         $exportParams = $this->settings['exportFields'];
@@ -126,14 +114,9 @@ class BackendCsv extends AbstractComponent
         $csv = new Csv(null, null, null, []);
         $csv->delimiter = $csv->output_delimiter = $this->settings['delimiter'];
         $csv->enclosure = $this->settings['enclosure'];
-        $csv->input_encoding = strtolower($this->getInputCharset());
-        $csv->output_encoding = strtolower($this->settings['encoding']);
-        $csv->convert_encoding = false;
-        if ($csv->input_encoding !== $csv->output_encoding) {
-            $csv->convert_encoding = true;
-        }
-        $csv->output($this->settings['fileName'], $data, $exportParams);
-        die();
+        $csv->output_filename = null;
+        $content = $csv->output(null, $data, $exportParams);
+        return $content;
     }
 
     /**

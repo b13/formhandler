@@ -3,6 +3,7 @@
 namespace Typoheads\Formhandler\Utility;
 
 use TYPO3\CMS\Core\Http\ApplicationType;
+use TYPO3\CMS\Core\Localization\LanguageService;
 
 /*                                                                        *
  * This script is part of the TYPO3 project - inspiring people to share!  *
@@ -113,14 +114,15 @@ class TemplateTCPDF extends \TCPDF
      */
     private function getLL($key)
     {
-        global $LANG;
-        if (ApplicationType::fromRequest($GLOBALS['TYPO3_REQUEST'])->isBackend()) {
-            $LANG->includeLLFile($this->sysLangFile);
-            $text = trim($LANG->getLL($key));
-        } else {
-            $text = trim($GLOBALS['TSFE']->sL('LLL:' . $this->sysLangFile . ':' . $key));
-        }
+        $languageService = $this->getLanguageService();
+        $languageService->includeLLFile($this->sysLangFile);
+        $text = trim($languageService->sL($key));
         return $text;
+    }
+
+    protected function getLanguageService(): LanguageService
+    {
+        return $GLOBALS['LANG'];
     }
 
     /**

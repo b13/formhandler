@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Typoheads\Formhandler\Controller;
 
-use B13\Formdata\Domain\Repository\FormDataRepository;
-use B13\Formdata\Service\FormdataService;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Template\ModuleTemplate;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
@@ -47,8 +45,7 @@ class ModuleController extends ActionController
         protected LogDataRepository $logDataRepository,
         protected Manager $componentManager,
         protected SiteFinder $siteFinder
-    )
-    {
+    ) {
         $this->utilityFuncs = GeneralUtility::makeInstance(\Typoheads\Formhandler\Utility\GeneralUtility::class);
     }
 
@@ -122,7 +119,7 @@ class ModuleController extends ActionController
         $site = $this->siteFinder->getSiteByPageId($pageId);
         if ($site !== null) {
             try {
-                $siteLanguage= $site->getLanguageById($logData->getLanguage());
+                $siteLanguage = $site->getLanguageById($logData->getLanguage());
                 $logData->setLanguageTitle($siteLanguage->getTitle());
             } catch (\InvalidArgumentException $e) {
             }
@@ -142,7 +139,7 @@ class ModuleController extends ActionController
         return $this->moduleTemplate->renderResponse('view');
     }
 
-    public function selectFieldsAction(string $logDataUids = null, string $filetype = ''): ResponseInterface
+    public function selectFieldsAction(?string $logDataUids = null, string $filetype = ''): ResponseInterface
     {
         if ($logDataUids !== null) {
             if (isset($this->settings[$filetype]['config']['fields'])) {

@@ -12,7 +12,6 @@ use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
-use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
 /*                                                                        *
  * This script is part of the TYPO3 project - inspiring people to share!  *

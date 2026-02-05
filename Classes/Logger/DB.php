@@ -100,7 +100,6 @@ class DB extends AbstractLogger
         //query the database
         $conn = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table);
 
-
         $conn->insert($table, $fields);
         $insertedUID = (int)$conn->lastInsertId($table);
 

@@ -54,7 +54,8 @@ class LogDataRepository extends Repository
                 $query->equals('deleted', 0),
                 $query->logicalOr(
                     ...$uidConstraints
-                ))
+                )
+            )
         )->execute();
     }
 

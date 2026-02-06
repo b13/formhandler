@@ -174,8 +174,6 @@ class FormController extends AbstractClass
             $this->loadSettingsForStep($this->currentStep);
         }
 
-        $this->parseConditions();
-
         if ($this->currentStep > $this->lastStep) {
             $this->loadSettingsForStep($this->lastStep);
         } else {
@@ -203,9 +201,6 @@ class FormController extends AbstractClass
             }
             $this->globals->setGP($this->gp);
         }
-
-        //Parse conditions again. An interceptor might have added additional values.
-        $this->parseConditions();
 
         if ($this->currentStep > $this->lastStep) {
             $this->loadSettingsForStep($this->lastStep);
@@ -267,7 +262,6 @@ class FormController extends AbstractClass
         //if form is valid
         if ($this->isValid($valid)) {
             $this->loadSettingsForStep($this->currentStep);
-            $this->parseConditions();
 
             //read template file
             $this->templateFile = $this->utilityFuncs->readTemplateFile($this->templateFile, $this->settings);
@@ -480,7 +474,6 @@ class FormController extends AbstractClass
     protected function processNotSubmitted()
     {
         $this->loadSettingsForStep($this->currentStep);
-        $this->parseConditions();
 
         $this->view->setSettings($this->settings);
 
@@ -504,7 +497,6 @@ class FormController extends AbstractClass
         }
 
         //Parse conditions again. An interceptor might have added additional values.
-        $this->parseConditions();
         $this->loadSettingsForStep($this->currentStep);
 
         return $this->view->render($this->gp, $this->errors);
@@ -920,66 +912,6 @@ class FormController extends AbstractClass
     }
 
     /**
-     * Method to parse a conditions block of the TS setting "if"
-     *
-     * @param array $settings The settings of this form
-     */
-    protected function parseConditionsBlock($settings)
-    {
-        foreach ($settings['if.'] as $idx => $conditionSettings) {
-            $conditions = $conditionSettings['conditions.'];
-            $orConditions = [];
-            foreach ($conditions as $subIdx => $andConditions) {
-                $results = [];
-                foreach ($andConditions as $subSubIdx => $andCondition) {
-                    $result = $this->utilityFuncs->getConditionResult($andCondition, $this->gp);
-                    $results[] = ($result ? 'TRUE' : 'FALSE');
-                }
-                $orConditions[] = '(' . implode(' && ', $results) . ')';
-            }
-            $finalCondition = '(' . implode(' || ', $orConditions) . ')';
-
-            eval('$evaluation = ' . $finalCondition . ';');
-
-            if ($evaluation) {
-                $newSettings = $conditionSettings['isTrue.'];
-                if (is_array($newSettings)) {
-                    $this->settings = $this->utilityFuncs->mergeConfiguration($this->settings, $newSettings);
-                }
-            } else {
-                $newSettings = $conditionSettings['else.'];
-                if (is_array($newSettings)) {
-                    $this->settings = $this->utilityFuncs->mergeConfiguration($this->settings, $newSettings);
-                }
-            }
-        }
-    }
-
-    /**
-     * Method to parse all conditions set in the TS setting "if"
-     */
-    protected function parseConditions()
-    {
-
-        //parse global conditions
-        if (isset($this->settings['if.']) && is_array($this->settings['if.'])) {
-            $this->parseConditionsBlock($this->settings);
-        }
-
-        //parse conditions for each of the previous steps
-        $endStep = $this->globals->getSession()->get('currentStep');
-        $step = 1;
-
-        while ($step <= $endStep) {
-            $stepSettings = $this->settings[$step . '.'] ?? null;
-            if (isset($stepSettings['if.']) && is_array($stepSettings['if.'])) {
-                $this->parseConditionsBlock($stepSettings);
-            }
-            $step++;
-        }
-    }
-
-    /**
      * Init method for the controller.
      * This method sets internal values, initializes the ajax handler and the session.
      */
@@ -1031,7 +963,6 @@ class FormController extends AbstractClass
             $this->utilityFuncs->doRedirect($GLOBALS['TSFE']->id, false, $_GET);
             exit();
         }
-        $this->parseConditions();
 
         $this->getStepInformation();
 
@@ -1044,8 +975,6 @@ class FormController extends AbstractClass
         }
 
         $this->mergeGPWithSession();
-
-        $this->parseConditions();
 
         if ((int)($this->utilityFuncs->getSingle($this->settings, 'disableConfigValidation')) === 0) {
             $this->validateConfig();

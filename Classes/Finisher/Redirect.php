@@ -14,6 +14,9 @@ namespace Typoheads\Formhandler\Finisher;
  * TABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General      *
  * Public License for more details.                                       *
  *                                                                        */
+
+use Typoheads\Formhandler\Component\ComponentProcessResult;
+
 /**
  * Sample implementation of a Finisher Class used by Formhandler redirecting to another page.
  * This class needs a parameter "redirect_page" to be set in TS.
@@ -27,15 +30,16 @@ namespace Typoheads\Formhandler\Finisher;
  */
 class Redirect extends AbstractFinisher
 {
-    public function process()
+    public function process(): ComponentProcessResult
     {
         //read redirect page
         $redirectPage = $this->utilityFuncs->getSingle($this->settings, 'redirectPage');
         if (!isset($redirectPage)) {
-            return $this->gp;
+            return new ComponentProcessResult(null, $this->gp);
         }
         $this->globals->getSession()->reset();
-        $this->utilityFuncs->doRedirectBasedOnSettings($this->settings, $this->gp);
+        $response = $this->utilityFuncs->doRedirectBasedOnSettings($this->settings, $this->gp);
+        return new ComponentProcessResult($response, null);
     }
 
     /**

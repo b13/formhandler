@@ -2,6 +2,7 @@
 
 namespace Typoheads\Formhandler\Controller;
 
+use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Typoheads\Formhandler\Component\Manager;
 use Typoheads\Formhandler\Plugin\AbstractPlugin;
@@ -46,7 +47,7 @@ class Dispatcher extends AbstractPlugin
      */
     protected $utilityFuncs;
 
-    public function main()
+    public function main(): ResponseInterface
     {
         $this->componentManager = GeneralUtility::makeInstance(Manager::class);
         $this->globals = GeneralUtility::makeInstance(Globals::class);

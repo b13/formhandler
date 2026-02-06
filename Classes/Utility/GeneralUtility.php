@@ -2,9 +2,11 @@
 
 namespace Typoheads\Formhandler\Utility;
 
+use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Mime\Address;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Crypto\Random;
+use TYPO3\CMS\Core\Http\RedirectResponse;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
@@ -303,13 +305,14 @@ class GeneralUtility implements SingletonInterface
      * @param mixed $redirect Page id or URL to redirect to
      * @param bool $correctRedirectUrl replace &amp; with & in URL
      */
-    public static function doRedirect($redirect, $correctRedirectUrl, $additionalParams = [], $headerStatusCode = ''): void
+    public static function doRedirect($redirect, $additionalParams = []): ?ResponseInterface
     {
 
         // these parameters have to be added to the redirect url
         $addParams = [];
-        if ($GLOBALS['TYPO3_REQUEST']->getParsedBody()['L'] ?? $GLOBALS['TYPO3_REQUEST']->getQueryParams()['L'] ?? null) {
-            $addParams['L'] = $GLOBALS['TYPO3_REQUEST']->getParsedBody()['L'] ?? $GLOBALS['TYPO3_REQUEST']->getQueryParams()['L'] ?? null;
+        $request = Globals::getRequest();
+        if ($request->getParsedBody()['L'] ?? $request->getQueryParams()['L'] ?? null) {
+            $addParams['L'] = $request->getParsedBody()['L'] ?? $request->getQueryParams()['L'] ?? null;
         }
 
         if (is_array($additionalParams)) {
@@ -328,24 +331,11 @@ class GeneralUtility implements SingletonInterface
 
         $url = Globals::getCObj()->createUrl($conf);
 
-        //correct the URL by replacing &amp;
-        if ($correctRedirectUrl) {
-            $url = str_replace('&amp;', '&', $url);
-        }
-
         if ($url) {
-            if (!Globals::isAjaxMode()) {
-                $status = '303 See Other';
-                if ($headerStatusCode) {
-                    $status = $headerStatusCode;
-                }
-                header('Status: ' . $status);
-                header('Location: ' . \TYPO3\CMS\Core\Utility\GeneralUtility::locationHeaderUrl($url));
-            } else {
-                print '{' . json_encode('redirect') . ':' . json_encode(\TYPO3\CMS\Core\Utility\GeneralUtility::locationHeaderUrl($url)) . '}';
-                exit;
-            }
+            $response = new RedirectResponse($url);
+            return $response;
         }
+        return null;
     }
 
     /**
@@ -356,7 +346,7 @@ class GeneralUtility implements SingletonInterface
      * @param array $gp Array with GET/POST parameters
      * @param string $redirectPageSetting Name of the Typoscript setting which holds the redirect page.
      */
-    public static function doRedirectBasedOnSettings($settings, $gp, $redirectPageSetting = 'redirectPage'): void
+    public static function doRedirectBasedOnSettings($settings, $gp, $redirectPageSetting = 'redirectPage'): ?ResponseInterface
     {
         $redirectPage = self::getSingle($settings, $redirectPageSetting);
 
@@ -366,8 +356,6 @@ class GeneralUtility implements SingletonInterface
         }
 
         if (strlen($redirectPage) > 0) {
-            $correctRedirectUrl = self::getSingle($settings, 'correctRedirectUrl');
-            $headerStatusCode = self::getSingle($settings, 'headerStatusCode');
             if (isset($settings['additionalParams']) && isset($settings['additionalParams.'])) {
                 $additionalParamsString = self::getSingle($settings, 'additionalParams');
                 $additionalParamsKeysAndValues = explode('&', $additionalParamsString);
@@ -379,10 +367,9 @@ class GeneralUtility implements SingletonInterface
             } else {
                 $additionalParams = $settings['additionalParams.'] ?? [];
             }
-            self::doRedirect($redirectPage, $correctRedirectUrl, $additionalParams, $headerStatusCode);
-            exit();
+            return self::doRedirect($redirectPage, $additionalParams);
         }
-        self::debugMessage('No redirectPage set.');
+        return null;
     }
 
     /**

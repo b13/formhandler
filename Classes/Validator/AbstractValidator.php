@@ -3,6 +3,7 @@
 namespace Typoheads\Formhandler\Validator;
 
 use Typoheads\Formhandler\Component\AbstractComponent;
+use Typoheads\Formhandler\Component\ComponentProcessResult;
 
 /*                                                                        *
  * This script is part of the TYPO3 project - inspiring people to share!  *
@@ -29,8 +30,8 @@ abstract class AbstractValidator extends AbstractComponent
      */
     abstract public function validate(&$errors);
 
-    public function process(): void
+    public function process(): ComponentProcessResult
     {
-        return;
+        return new ComponentProcessResult();
     }
 }

@@ -3,6 +3,7 @@
 namespace Typoheads\Formhandler\PreProcessor;
 
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Typoheads\Formhandler\Component\ComponentProcessResult;
 
 /*                                                                        *
  * This script is part of the TYPO3 project - inspiring people to share!  *
@@ -44,7 +45,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class LoadDefaultValues extends AbstractPreProcessor
 {
-    public function process()
+    public function process(): ComponentProcessResult
     {
         foreach ($this->settings as $step => $stepSettings) {
             $step = preg_replace('/\.$/', '', $step);
@@ -55,7 +56,7 @@ class LoadDefaultValues extends AbstractPreProcessor
                 $this->loadDefaultValuesToSession($stepSettings, $step);
             }
         }
-        return $this->gp;
+        return new ComponentProcessResult(null, $this->gp);
     }
 
     /**

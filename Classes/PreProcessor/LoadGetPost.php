@@ -14,6 +14,9 @@ namespace Typoheads\Formhandler\PreProcessor;
  * TABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General      *
  * Public License for more details.                                       *
  *                                                                        */
+
+use Typoheads\Formhandler\Component\ComponentProcessResult;
+
 /**
  * A pre processor for Formhandler loading GET/POST parameters passed from another page.
  */
@@ -24,11 +27,11 @@ class LoadGetPost extends AbstractPreProcessor
      *
      * @return array The probably modified GET/POST parameters
      */
-    public function process()
+    public function process(): ComponentProcessResult
     {
         $loadedGP = $this->loadGP();
         $this->gp = array_merge($loadedGP, $this->gp);
-        return $this->gp;
+        return new ComponentProcessResult(null, $this->gp);
     }
 
     /**
@@ -38,7 +41,7 @@ class LoadGetPost extends AbstractPreProcessor
      */
     protected function loadGP()
     {
-        $gp = array_merge($GLOBALS['TYPO3_REQUEST']->getQueryParams(), $GLOBALS['TYPO3_REQUEST']->getParsedBody());
+        $gp = array_merge($this->request->getQueryParams(), $this->request->getParsedBody());
         $formValuesPrefix = $this->globals->getFormValuesPrefix();
         if ($formValuesPrefix) {
             $gp = $gp[$formValuesPrefix];

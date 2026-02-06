@@ -2,7 +2,11 @@
 
 namespace Typoheads\Formhandler\Generator;
 
+use TYPO3\CMS\Core\Http\ResponseFactory;
+use TYPO3\CMS\Core\Http\StreamFactory;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Typoheads\Formhandler\Component\AbstractComponent;
+use Typoheads\Formhandler\Component\ComponentProcessResult;
 use Typoheads\Formhandler\Utility\TemplateTCPDF;
 
 /*                                                                        *
@@ -59,7 +63,7 @@ class BackendTcPdf extends AbstractComponent
         $this->settings['font'] = $font;
     }
 
-    public function process(): string
+    public function process(): ComponentProcessResult
     {
         $records = $this->settings['records'];
         $exportFields = $this->settings['exportFields'];
@@ -168,6 +172,15 @@ class BackendTcPdf extends AbstractComponent
         }
 
         $content = $this->pdf->Output($this->settings['fileName'], 'S');
-        return $content;
+
+        $responseFactory = GeneralUtility::makeInstance(ResponseFactory::class);
+        $streamFactory = GeneralUtility::makeInstance(StreamFactory::class);
+
+        $response = $responseFactory->createResponse()
+            ->withHeader('Content-Type', 'application/pdf')
+            ->withHeader('Content-Disposition', 'attachment; filename="formhandler.pdf"')
+            ->withBody($streamFactory->createStream($content));
+
+        return new ComponentProcessResult($response);
     }
 }

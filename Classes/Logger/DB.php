@@ -7,6 +7,7 @@ use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\Page\PageInformation;
 use Typoheads\Formhandler\Component\AbstractComponent;
+use Typoheads\Formhandler\Component\ComponentProcessResult;
 
 /*                                                                        *
  * This script is part of the TYPO3 project - inspiring people to share!  *
@@ -27,10 +28,8 @@ class DB extends AbstractComponent
 {
     /**
      * Logs the given values.
-     *
-     * @return array
      */
-    public function process()
+    public function process(): ComponentProcessResult
     {
 
         //set params
@@ -118,8 +117,7 @@ class DB extends AbstractComponent
         if ((int)($this->utilityFuncs->getSingle($this->settings, 'nodebug')) !== 1) {
             $this->utilityFuncs->debugMessage('logging', [$table, implode(',', $fields)]);
         }
-
-        return $this->gp;
+        return new ComponentProcessResult(null, $this->gp);
     }
 
     protected function parseFieldOrder($order, $orderedFields = [])

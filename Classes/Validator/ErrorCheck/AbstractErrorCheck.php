@@ -3,6 +3,7 @@
 namespace Typoheads\Formhandler\Validator\ErrorCheck;
 
 use Typoheads\Formhandler\Component\AbstractComponent;
+use Typoheads\Formhandler\Component\ComponentProcessResult;
 
 /*                                                                        *
  * This script is part of the TYPO3 project - inspiring people to share!  *
@@ -24,12 +25,9 @@ abstract class AbstractErrorCheck extends AbstractComponent
     protected $formFieldName;
     protected $mandatoryParameters = [];
 
-    /**
-     * @return array
-     */
-    public function process()
+    public function process(): ComponentProcessResult
     {
-        return [];
+        return new ComponentProcessResult();
     }
 
     public function setFormFieldName($name): void

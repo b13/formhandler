@@ -228,23 +228,16 @@ class ModuleController extends ActionController
                 $this->settings['pdf']['config']['records'] = $convertedLogDataRows;
                 $this->settings['pdf']['config']['exportFields'] = $fields;
                 $generator->init([], $this->settings['pdf']['config']);
-                $content = $generator->process();
-                return $this->responseFactory->createResponse()
-                    ->withHeader('Content-Type', 'application/pdf')
-                    ->withHeader('Content-Disposition', 'attachment; filename="formhandler.pdf"')
-                    ->withBody($this->streamFactory->createStream($content));
+                $result = $generator->process();
+                return $result->response;
             }
             if ($filetype === 'csv') {
                 $generator = $this->componentManager->getComponent(BackendCsv::class);
                 $this->settings['csv']['config']['records'] = $convertedLogDataRows;
                 $this->settings['csv']['config']['exportFields'] = $fields;
                 $generator->init([], $this->settings['csv']['config']);
-                $content = $generator->process();
-                return $this->responseFactory->createResponse()
-                    ->withHeader('Content-Type', 'application/csv')
-                    ->withHeader('Content-Length', (string)strlen($content))
-                    ->withHeader('Content-Disposition', 'attachment; filename="formhandler.csv"')
-                    ->withBody($this->streamFactory->createStream($content));
+                $result = $generator->process();
+                return $result->response;
             }
         }
         return $this->htmlResponse('not found');

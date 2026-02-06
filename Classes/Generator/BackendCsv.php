@@ -3,7 +3,11 @@
 namespace Typoheads\Formhandler\Generator;
 
 use ParseCsv\Csv;
+use TYPO3\CMS\Core\Http\ResponseFactory;
+use TYPO3\CMS\Core\Http\StreamFactory;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Typoheads\Formhandler\Component\AbstractComponent;
+use Typoheads\Formhandler\Component\ComponentProcessResult;
 
 /*                                                                        *
  * This script is part of the TYPO3 project - inspiring people to share!  *
@@ -53,7 +57,7 @@ class BackendCsv extends AbstractComponent
         $this->settings['encoding'] = $encoding;
     }
 
-    public function process(): string
+    public function process(): ComponentProcessResult
     {
         $records = $this->settings['records'];
         $exportParams = $this->settings['exportFields'];
@@ -116,7 +120,15 @@ class BackendCsv extends AbstractComponent
         $csv->enclosure = $this->settings['enclosure'];
         $csv->output_filename = null;
         $content = $csv->output(null, $data, $exportParams);
-        return $content;
+
+        $responseFactory = GeneralUtility::makeInstance(ResponseFactory::class);
+        $streamFactory = GeneralUtility::makeInstance(StreamFactory::class);
+        $response = $responseFactory->createResponse()
+            ->withHeader('Content-Type', 'application/csv')
+            ->withHeader('Content-Length', (string)strlen($content))
+            ->withHeader('Content-Disposition', 'attachment; filename="formhandler.csv"')
+            ->withBody($streamFactory->createStream($content));
+        return new ComponentProcessResult($response);
     }
 
     /**

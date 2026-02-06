@@ -3,6 +3,7 @@
 namespace Typoheads\Formhandler\PreProcessor;
 
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Typoheads\Formhandler\Component\ComponentProcessResult;
 
 /*                                                                        *
  * This script is part of the TYPO3 project - inspiring people to share!  *
@@ -36,14 +37,14 @@ class ClearTempFiles extends AbstractPreProcessor
      * @param array $settings The defined TypoScript settings for the finisher
      * @return array The probably modified GET/POST parameters
      */
-    public function process()
+    public function process(): ComponentProcessResult
     {
         $olderThanValue = $this->utilityFuncs->getSingle($this->settings['clearTempFilesOlderThan.'], 'value');
         $olderThanUnit = $this->utilityFuncs->getSingle($this->settings['clearTempFilesOlderThan.'], 'unit');
         if (strlen($olderThanValue) > 0 && is_numeric($olderThanValue)) {
             $this->clearTempFiles($olderThanValue, $olderThanUnit);
         }
-        return $this->gp;
+        return new ComponentProcessResult(null, $this->gp);
     }
 
     /**

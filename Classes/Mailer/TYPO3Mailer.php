@@ -3,6 +3,8 @@
 namespace Typoheads\Formhandler\Mailer;
 
 use TYPO3\CMS\Core\Mail\MailMessage;
+use Typoheads\Formhandler\Component\AbstractComponent;
+use Typoheads\Formhandler\Component\ComponentProcessResult;
 
 /*                                                                        *
  * This script is part of the TYPO3 project - inspiring people to share!  *
@@ -17,7 +19,7 @@ use TYPO3\CMS\Core\Mail\MailMessage;
  * Public License for more details.                                       *
  *                                                                        */
 
-class TYPO3Mailer extends AbstractMailer implements MailerInterface
+class TYPO3Mailer extends AbstractComponent implements MailerInterface
 {
     /**
      * The TYPO3 mail message object
@@ -30,6 +32,11 @@ class TYPO3Mailer extends AbstractMailer implements MailerInterface
     {
         parent::__construct();
         $this->emailObj = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(MailMessage::class);
+    }
+
+    public function process(): ComponentProcessResult
+    {
+        return new ComponentProcessResult();
     }
 
     /* (non-PHPdoc)

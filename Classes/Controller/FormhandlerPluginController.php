@@ -11,8 +11,7 @@ class FormhandlerPluginController extends ActionController
     {
         $dispatcher = new Dispatcher();
         $dispatcher->setRequests($this->request);
-        $content = $dispatcher->main('', []);
-        return $this->htmlResponse($content);
+        return $dispatcher->main('', []);
     }
 
 }

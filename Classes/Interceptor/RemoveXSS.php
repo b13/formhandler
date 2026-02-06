@@ -3,6 +3,7 @@
 namespace Typoheads\Formhandler\Interceptor;
 
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Typoheads\Formhandler\Component\ComponentProcessResult;
 
 /*                                                                        *
  * This script is part of the TYPO3 project - inspiring people to share!  *
@@ -29,7 +30,7 @@ class RemoveXSS extends AbstractInterceptor
      *
      * @return array The probably modified GET/POST parameters
      */
-    public function process()
+    public function process(): ComponentProcessResult
     {
         $this->removeChars = [];
 
@@ -63,7 +64,7 @@ class RemoveXSS extends AbstractInterceptor
             $this->removeChars = [];
         }
         $this->gp = $this->sanitizeValues($this->gp);
-        return $this->gp;
+        return new ComponentProcessResult(null, $this->gp);
     }
 
     /**

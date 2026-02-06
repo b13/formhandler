@@ -23,14 +23,7 @@ class MailView extends FormView
 {
     protected $currentMailSettings;
 
-    /**
-     * Main method called by the controller.
-     *
-     * @param array $gp The current GET/POST parameters
-     * @param array $errors In this class the second param is used to pass information about the email mode (HTML|PLAIN)
-     * @return string content
-     */
-    public function render($gp, $errors)
+    public function render(array $gp, array $errors): string
     {
         $this->currentMailSettings = $errors;
         $content = '';

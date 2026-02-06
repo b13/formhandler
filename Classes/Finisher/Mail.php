@@ -4,6 +4,7 @@ namespace Typoheads\Formhandler\Finisher;
 
 use TYPO3\CMS\Core\Service\MarkerBasedTemplateService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Typoheads\Formhandler\Component\ComponentProcessResult;
 use Typoheads\Formhandler\Mailer\MailerInterface;
 use Typoheads\Formhandler\Mailer\TYPO3Mailer;
 use Typoheads\Formhandler\View\MailView;
@@ -87,7 +88,7 @@ class Mail extends AbstractFinisher
      *
      * @return array The probably modified GET/POST parameters
      */
-    public function process()
+    public function process(): ComponentProcessResult
     {
 
         //send emails
@@ -95,8 +96,7 @@ class Mail extends AbstractFinisher
         $this->sendMail('admin');
         $this->initMailer('user');
         $this->sendMail('user');
-
-        return $this->gp;
+        return new ComponentProcessResult(null, $this->gp);
     }
 
     protected function initMailer($type)

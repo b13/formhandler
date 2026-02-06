@@ -15,6 +15,11 @@ namespace Typoheads\Formhandler\Finisher;
  * Public License for more details.                                       *
  *                                                                        */
 
+use TYPO3\CMS\Core\Http\ResponseFactory;
+use TYPO3\CMS\Core\Http\StreamFactory;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Typoheads\Formhandler\Component\ComponentProcessResult;
+
 /**
  * A finisher showing the content of ###TEMPLATE_SUBMITTEDOK### replacing all common Formhandler markers
  * plus ###PRINT_LINK###, ###PDF_LINK### and ###CSV_LINK###.
@@ -41,13 +46,14 @@ class SubmittedOK extends AbstractFinisher
      *
      * @return array The probably modified GET/POST parameters
      */
-    public function process()
+    public function process(): ComponentProcessResult
     {
         //read template file
         $this->templateFile = $this->globals->getTemplateCode();
         if (isset($this->settings['templateFile'])) {
             $this->templateFile = $this->utilityFuncs->readTemplateFile(false, $this->settings);
         }
+        /** @var \Typoheads\Formhandler\View\SubmittedOK $view */
         $view = $this->componentManager->getComponent(\Typoheads\Formhandler\View\SubmittedOK::class);
 
         //show TEMPLATE_SUBMITTEDOK
@@ -61,6 +67,14 @@ class SubmittedOK extends AbstractFinisher
 
         $view->setSettings($this->globals->getSession()->get('settings'));
         $view->setComponentSettings($this->settings);
-        return $view->render($this->gp, []);
+        $content = $view->render($this->gp, []);
+        if (trim($content) !== '') {
+            $responseFactory = GeneralUtility::makeInstance(ResponseFactory::class);
+            $streamFactory = GeneralUtility::makeInstance(StreamFactory::class);
+            $response = $responseFactory->createResponse()
+                ->withBody($streamFactory->createStream($content));
+            return new ComponentProcessResult($response, null);
+        }
+        return new ComponentProcessResult();
     }
 }

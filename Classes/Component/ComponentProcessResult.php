@@ -15,31 +15,23 @@ namespace Typoheads\Formhandler\Component;
 * Public License for more details.                                       *
 *                                                                        */
 
-/**
- * Abstract component class for any usable Formhandler component.
- * This class extends the abstract class and adds some useful variables and methods.
- * @abstract
- */
-abstract class AbstractComponent extends AbstractClass
+use Psr\Http\Message\ResponseInterface;
+
+class ComponentProcessResult
 {
-    protected array $gp = [];
+    public function __construct(
+        public readonly ?ResponseInterface $response = null,
+        public readonly ?array $gp = null
+    ) {}
 
-    /**
-     * Initialize the class variables
-     *
-     * @param array $gp GET and POST variable array
-     * @param array $settings Typoscript configuration for the component (component.1.config.*)
-     */
-    public function init($gp, $settings): void
+    public function hasGp(): bool
     {
-        $this->gp = $gp;
-        $this->settings = $settings;
+        return $this->gp !== null;
     }
 
-    abstract public function process(): ComponentProcessResult;
-
-    public function validateConfig()
+    public function hasResponse(): bool
     {
-        return true;
+        return $this->response !== null;
     }
+
 }

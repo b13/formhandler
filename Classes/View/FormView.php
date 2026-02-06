@@ -58,7 +58,7 @@ class FormView extends AbstractClass
      * @param array $errors The errors occurred in validation
      * @return string content
      */
-    public function render($gp, $errors)
+    public function render(array $gp, array $errors): string
     {
 
         //set GET/POST parameters

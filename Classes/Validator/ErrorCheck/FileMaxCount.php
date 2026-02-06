@@ -45,6 +45,7 @@ class FileMaxCount extends AbstractErrorCheck
             $currentStep === $lastStep
         ) {
             $found = false;
+            $info = null;
             foreach ($_FILES as $idx => $info) {
                 if (isset($info['name'][$this->formFieldName])) {
                     if (!is_array($info['name'][$this->formFieldName])) {
@@ -56,7 +57,7 @@ class FileMaxCount extends AbstractErrorCheck
                 }
             }
             if ($found) {
-                foreach ($info['name'][$this->formFieldName] as $newFileName) {
+                foreach ($info['name'][$this->formFieldName] ?? [] as $newFileName) {
                     $exists = false;
                     foreach ($files[$this->formFieldName] as $fileInfo) {
                         if ($fileInfo['name'] === $newFileName) {

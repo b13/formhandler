@@ -19,7 +19,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 /**
  * A default view for Formhandler E-Mails
  */
-class Mail extends Form
+class MailView extends FormView
 {
     protected $currentMailSettings;
 
@@ -38,11 +38,6 @@ class Mail extends Form
             $this->settings = $this->globals->getSettings();
             $content = parent::render($gp, []);
         }
-        return $content;
-    }
-
-    public function pi_wrapInBaseClass($content)
-    {
         return $content;
     }
 

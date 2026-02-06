@@ -5,6 +5,8 @@ namespace Typoheads\Formhandler\Controller;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Typoheads\Formhandler\Component\AbstractClass;
+use Typoheads\Formhandler\Component\Configuration;
 use Typoheads\Formhandler\Finisher\SubmittedOK;
 use Typoheads\Formhandler\Interceptor\RemoveXSS;
 
@@ -24,99 +26,33 @@ use Typoheads\Formhandler\Interceptor\RemoveXSS;
 /**
  * Default controller for Formhandler
  */
-class Form extends AbstractController
+class FormController extends AbstractClass
 {
-    /**
-     * The current GET/POST parameters of the form
-     *
-     * @var array
-     */
-    protected $gp;
+    protected array $gp = []; // The current GET/POST parameters of the form
+    protected array $errors = []; // Contains all errors occurred while validation
+    protected string $formValuesPrefix = ''; // Holds the prefix value of all parameters of this form.
+    protected bool $submitted = false; // flag indicating if the form got submitted
 
-    /**
-     * Contains all errors occurred while validation
-     *
-     * @var array
-     */
-    protected $errors = [];
+    protected ?\Typoheads\Formhandler\View\FormView $view = null;
+    protected int $currentStep = 0;
+    protected int $lastStep = 0;
+    protected int $totalSteps = 0;
+    protected bool $finished = false;
 
-    /**
-     * Holds the prefix value of all parameters of this form.
-     *
-     * @var string
-     */
-    protected $formValuesPrefix;
+    protected string $predefined = '';
+    protected string $templateFile = '';
+    protected array $langFiles = [];
+    protected ?Configuration $configuration = null;
 
-    /**
-     * Flag indicating if the form got submitted
-     *
-     * @var bool
-     */
-    protected $submitted;
-
-    /**
-     * The settings array
-     *
-     * @var array
-     */
-    protected $settings;
-
-    /**
-     * Flag indicating if debug mode is on
-     *
-     * @var bool
-     */
-    protected $debugMode;
-
-    /**
-     * The view object
-     *
-     * @var misc
-     */
-    protected $view;
-
-    /**
-     * The current step of the form
-     *
-     * @var int
-     */
-    protected $currentStep;
-
-    /**
-     * The last step of the form
-     *
-     * @var int
-     */
-    protected $lastStep;
-
-    /**
-     * Total steps of the form
-     *
-     * @var int
-     */
-    protected $totalSteps;
-
-    /**
-     * Flag indicating if form is finished (no more steps)
-     *
-     * @var bool
-     */
-    protected $finished;
-
-    /**
-     * Main method of the form handler.
-     *
-     * @return rendered view
-     */
     public function process()
     {
         $this->init();
         $this->storeFileNamesInGP();
         $this->processFileRemoval();
 
-        $action = $GLOBALS['TYPO3_REQUEST']->getParsedBody()['action'] ?? $GLOBALS['TYPO3_REQUEST']->getQueryParams()['action'] ?? null;
+        $action = $this->request->getParsedBody()['action'] ?? $this->request->getQueryParams()['action'] ?? null;
         if ($this->globals->getFormValuesPrefix()) {
-            $temp = $GLOBALS['TYPO3_REQUEST']->getParsedBody()[$this->globals->getFormValuesPrefix()] ?? $GLOBALS['TYPO3_REQUEST']->getQueryParams()[$this->globals->getFormValuesPrefix()] ?? null;
+            $temp = $this->request->getParsedBody()[$this->globals->getFormValuesPrefix()] ?? $this->request->getQueryParams()[$this->globals->getFormValuesPrefix()] ?? null;
             $action = $temp['action'] ?? null;
         }
         if ($action) {
@@ -156,7 +92,7 @@ class Form extends AbstractController
         $content = '';
         $gp = $_GET;
         if ($this->globals->getFormValuesPrefix()) {
-            $gp = $GLOBALS['TYPO3_REQUEST']->getParsedBody()[$this->globals->getFormValuesPrefix()] ?? $GLOBALS['TYPO3_REQUEST']->getQueryParams()[$this->globals->getFormValuesPrefix()] ?? null;
+            $gp = $this->request->getParsedBody()[$this->globals->getFormValuesPrefix()] ?? $this->request->getQueryParams()[$this->globals->getFormValuesPrefix()] ?? null;
         }
         if (is_array($this->settings['finishers.'])) {
             $finisherConf = [];
@@ -248,7 +184,7 @@ class Form extends AbstractController
 
         //run init interceptors
         $this->addFormhandlerClass($this->settings['initInterceptors.'], RemoveXSS::class);
-        $output = (string)$this->runClasses($this->settings['initInterceptors.']);
+        $output = (string)$this->runClasses($this->settings['initInterceptors.'] ?? []);
         if (strlen($output) > 0) {
             return $output;
         }
@@ -379,7 +315,7 @@ class Form extends AbstractController
      */
     protected function validateErrorCheckConfig()
     {
-        if (isset($_FILES) && is_array($_FILES) && !empty($_FILES)) {
+        if (!empty($_FILES)) {
 
             //for all file properties
             foreach ($_FILES as $sthg => $files) {
@@ -477,14 +413,14 @@ class Form extends AbstractController
         if ((int)($this->utilityFuncs->getSingle($this->settings, 'skipView')) === 1) {
 
             //run preProcessors
-            $output = $this->runClasses($this->settings['preProcessors.']);
+            $output = $this->runClasses($this->settings['preProcessors.'] ?? []);
             if (strlen($output) > 0) {
                 return $output;
             }
 
             //run init interceptors
             $this->addFormhandlerClass($this->settings['initInterceptors.'], 'Interceptor\\RemoveXSS');
-            $output = $this->runClasses($this->settings['initInterceptors.']);
+            $output = $this->runClasses($this->settings['initInterceptors.'] ?? []);
             if (strlen($output) > 0) {
                 return $output;
             }
@@ -493,14 +429,14 @@ class Form extends AbstractController
 
         //run save interceptors
         $this->addFormhandlerClass($this->settings['saveInterceptors.'], 'Interceptor\\RemoveXSS');
-        $output = (string)$this->runClasses($this->settings['saveInterceptors.']);
+        $output = (string)$this->runClasses($this->settings['saveInterceptors.'] ?? []);
         if (strlen($output) > 0) {
             return $output;
         }
 
         //run loggers
         $this->addFormhandlerClass($this->settings['loggers.'], 'Logger_DB');
-        $output = (string)$this->runClasses($this->settings['loggers.']);
+        $output = (string)$this->runClasses($this->settings['loggers.'] ?? []);
         if (strlen($output) > 0) {
             return $output;
         }
@@ -562,7 +498,7 @@ class Form extends AbstractController
         }
 
         $this->addFormhandlerClass($this->settings['initInterceptors.'], 'Interceptor\\RemoveXSS');
-        $output = $this->runClasses($this->settings['initInterceptors.']);
+        $output = $this->runClasses($this->settings['initInterceptors.'] ?? []);
         if (isset($output) && strlen((string)$output) > 0) {
             return $output;
         }
@@ -698,7 +634,7 @@ class Form extends AbstractController
         $sessionFiles = $this->globals->getSession()->get('files');
         $tempFiles = $sessionFiles;
 
-        if (isset($_FILES) && is_array($_FILES) && !empty($_FILES)) {
+        if (!empty($_FILES)) {
             $uploadedFilesWithSameNameAction = $this->utilityFuncs->getSingle($this->settings['files.'], 'uploadedFilesWithSameName');
             if (!$uploadedFilesWithSameNameAction) {
                 $uploadedFilesWithSameNameAction = 'ignore';
@@ -727,7 +663,6 @@ class Form extends AbstractController
                             $uploadPath = $this->utilityFuncs->getTYPO3Root() . $uploadFolder;
 
                             if (!file_exists($uploadPath)) {
-                                $this->utilityFuncs->debugMessage('folder_doesnt_exist', [$uploadPath], 3);
                                 return;
                             }
 
@@ -806,7 +741,6 @@ class Form extends AbstractController
             }
         }
         $this->globals->getSession()->set('files', $tempFiles);
-        $this->utilityFuncs->debugMessage('Files:', [], 1, (array)$tempFiles);
     }
 
     /**
@@ -871,7 +805,6 @@ class Form extends AbstractController
         $this->gp = $gp;
         $this->currentStep = 1;
         $this->globals->setGP($this->gp);
-        $this->utilityFuncs->debugMessage('cleared_session');
     }
 
     /**
@@ -879,6 +812,8 @@ class Form extends AbstractController
      */
     protected function findCurrentStep()
     {
+        $action = null;
+        $step = null;
         if (isset($this->gp) && is_array($this->gp)) {
             $action = 'reload';
             $keys = array_keys($this->gp);
@@ -941,7 +876,6 @@ class Form extends AbstractController
                 }
             }
         }
-        $this->utilityFuncs->debugMessage('current_step', [$this->currentStep]);
 
         if (!$isValidStep) {
             $this->utilityFuncs->throwException('You are not allowed to go to this step!');
@@ -1051,14 +985,11 @@ class Form extends AbstractController
      */
     protected function init()
     {
+        $this->configuration = GeneralUtility::makeInstance(Configuration::class);
         $this->settings = $this->getSettings();
         $this->formValuesPrefix = $this->utilityFuncs->getSingle($this->settings, 'formValuesPrefix');
         $this->globals->setFormID($this->utilityFuncs->getSingle($this->settings, 'formID'));
         $this->globals->setFormValuesPrefix($this->formValuesPrefix);
-
-        $isDebugMode = $this->utilityFuncs->getSingle($this->settings, 'debug');
-        $this->debugMode = ((int)$isDebugMode === 1);
-
         $this->gp = $this->utilityFuncs->getMergedGP();
 
         if (!isset($this->settings['uniqueFormID']) || !$this->settings['uniqueFormID']) {
@@ -1080,7 +1011,7 @@ class Form extends AbstractController
 
         $sessionClass = $this->utilityFuncs->getPreparedClassName($this->settings['session.'] ?? null, 'Session\PHP');
         $session = $this->componentManager->getComponent($sessionClass);
-        $sessionConfig = null;
+        $sessionConfig = [];
         if (isset($this->settings['session.']) && isset($this->settings['session.']['config.'])) {
             $sessionConfig = $this->settings['session.']['config.'];
         }
@@ -1088,9 +1019,9 @@ class Form extends AbstractController
         $session->start();
         $this->globals->setSession($session);
 
-        $action = $GLOBALS['TYPO3_REQUEST']->getParsedBody()['action'] ?? $GLOBALS['TYPO3_REQUEST']->getQueryParams()['action'] ?? null;
+        $action = $this->request->getParsedBody()['action'] ?? $this->request->getQueryParams()['action'] ?? null;
         if ($this->globals->getFormValuesPrefix()) {
-            $temp = $GLOBALS['TYPO3_REQUEST']->getParsedBody()[$this->globals->getFormValuesPrefix()] ?? $GLOBALS['TYPO3_REQUEST']->getQueryParams()[$this->globals->getFormValuesPrefix()] ?? null;
+            $temp = $this->request->getParsedBody()[$this->globals->getFormValuesPrefix()] ?? $this->request->getQueryParams()[$this->globals->getFormValuesPrefix()] ?? null;
             $action = $temp['action'] ?? null;
         }
         if ($this->globals->getSession()->get('finished') && !$action) {
@@ -1121,20 +1052,7 @@ class Form extends AbstractController
         }
         $this->globals->setSettings($this->settings);
 
-        //set debug mode again cause it may have changed in specific step settings
-        $isDebugMode = $this->utilityFuncs->getSingle($this->settings, 'debug');
-        $this->debugMode = ((int)$isDebugMode === 1);
-        $this->globals->getSession()->set('debug', $this->debugMode);
-
-        $this->utilityFuncs->debugMessage('using_prefix', [$this->formValuesPrefix]);
-
         $this->globals->getSession()->set('predef', $this->globals->getPredef());
-
-        //init view
-        $viewClass = $this->utilityFuncs->getPreparedClassName($this->settings['view.'] ?? null, 'View\Form');
-        $this->utilityFuncs->debugMessage('using_view', [$viewClass]);
-
-        $this->utilityFuncs->debugMessage('current_gp', [], 1, $this->gp);
 
         $this->storeSettingsInSession();
 
@@ -1157,8 +1075,7 @@ class Form extends AbstractController
         $this->addJS();
         $this->addJSFooter();
 
-        $this->utilityFuncs->debugMessage('current_session_params', [], 1, (array)$this->globals->getSession()->get('values'));
-        $this->view = $this->componentManager->getComponent($viewClass);
+        $this->view = $this->componentManager->getComponent(\Typoheads\Formhandler\View\FormView::class);
         $this->view->setLangFiles($this->langFiles);
         $this->view->setSettings($this->settings);
 
@@ -1171,12 +1088,10 @@ class Form extends AbstractController
 
     /**
      * Checks if the form has been submitted
-     *
-     * @return bool
      */
-    protected function isFormSubmitted()
+    protected function isFormSubmitted(): bool
     {
-        $submitted = $this->gp['submitted'] ?? null;
+        $submitted = $this->gp['submitted'] ?? false;
         if ($submitted) {
             foreach ($this->gp as $key => $value) {
                 if (substr($key, 0, 5) === 'step-') {
@@ -1204,12 +1119,10 @@ class Form extends AbstractController
         } elseif (isset($this->settings['templateSuffix']) && strstr($this->templateFile, ('###TEMPLATE_FORM' . $step . $this->settings['templateSuffix'] . '###'))) {
 
             // search for ###TEMPLATE_FORM[step][suffix]###
-            $this->utilityFuncs->debugMessage('using_subpart', ['###TEMPLATE_FORM' . $step . $this->settings['templateSuffix'] . '###']);
             $this->view->setTemplate($this->templateFile, ('FORM' . $step . $this->settings['templateSuffix']));
         } elseif (!isset($this->settings['templateSuffix']) && strstr($this->templateFile, ('###TEMPLATE_FORM' . $step . '###'))) {
 
             //search for ###TEMPLATE_FORM[step]###
-            $this->utilityFuncs->debugMessage('using_subpart', ['###TEMPLATE_FORM' . $step . '###']);
             $this->view->setTemplate($this->templateFile, ('FORM' . $step));
         } elseif ((int)$step === (int)($this->globals->getSession()->get('lastStep')) + 1) {
             $this->finished = true;
@@ -1224,7 +1137,6 @@ class Form extends AbstractController
         $values = [
             'formValuesPrefix' => $this->formValuesPrefix,
             'settings' => $this->settings,
-            'debug' => $this->debugMode,
             'currentStep' => $this->currentStep,
             'totalSteps' => $this->totalSteps,
             'lastStep' => $this->lastStep,
@@ -1257,7 +1169,7 @@ class Form extends AbstractController
     {
         $this->findCurrentStep();
 
-        $this->lastStep = $this->globals->getSession()->get('currentStep');
+        $this->lastStep = (int)$this->globals->getSession()->get('currentStep');
         if (!$this->lastStep) {
             $this->lastStep = 1;
         }
@@ -1284,11 +1196,6 @@ class Form extends AbstractController
         sort($subparts);
         $countSubparts = count($subparts);
         $this->totalSteps = $subparts[$countSubparts - 1];
-        if ($this->totalSteps > $countSubparts) {
-            $this->utilityFuncs->debugMessage('subparts_missing', [implode(', ', $subparts)], 2);
-        } else {
-            $this->utilityFuncs->debugMessage('total_steps', [$this->totalSteps]);
-        }
     }
 
     /**
@@ -1319,13 +1226,13 @@ class Form extends AbstractController
 
     /**
      * Runs the class by calling process() method.
-     *
-     * @param array $classesArray : the configuration array
-     * @return mixed
      */
-    protected function runClasses($classesArray)
+    protected function runClasses(array $classesArray)
     {
-        if (isset($classesArray) && is_array($classesArray) && (int)($this->utilityFuncs->getSingle($classesArray, 'disable')) !== 1) {
+        if (empty($classesArray)) {
+            return;
+        }
+        if ((int)($this->utilityFuncs->getSingle($classesArray, 'disable')) !== 1) {
             ksort($classesArray);
 
             //Load language files everytime before running a component. They may have been changed by previous components
@@ -1336,11 +1243,11 @@ class Form extends AbstractController
                     $className = $this->utilityFuncs->getPreparedClassName($tsConfig);
                     if (is_array($tsConfig) && strlen($className) > 0) {
                         if ((int)($this->utilityFuncs->getSingle($tsConfig, 'disable')) !== 1) {
-                            $this->utilityFuncs->debugMessage('calling_class', [$className]);
                             $obj = $this->componentManager->getComponent($className);
                             $tsConfig['config.'] = $this->addDefaultComponentConfig($tsConfig['config.'] ?? null);
                             $obj->init($this->gp, $tsConfig['config.']);
                             $obj->validateConfig();
+                            // xxx
                             $return = $obj->process();
                             if (is_array($return)) {
 
@@ -1480,5 +1387,45 @@ class Form extends AbstractController
             }
         }
         return $newGP;
+    }
+
+    /**
+     * Sets the internal attribute "predefined"
+     *
+     * @param string $key
+     */
+    public function setPredefined($key): void
+    {
+        $this->predefined = $key;
+    }
+
+    /**
+     * Sets the internal attribute "langFile"
+     *
+     * @param array $langFiles
+     */
+    public function setLangFiles($langFiles): void
+    {
+        $this->langFiles = $langFiles;
+    }
+
+    /**
+     * Sets the template file attribute to $template
+     * @param string $template
+     */
+    public function setTemplateFile($template): void
+    {
+        $this->templateFile = $template;
+    }
+
+    public function getSettings()
+    {
+        $settings = $this->configuration->getSettings();
+        if ($this->predefined && is_array($settings['predef.'][$this->predefined])) {
+            $predefSettings = $settings['predef.'][$this->predefined];
+            unset($settings['predef.']);
+            $settings = $this->utilityFuncs->mergeConfiguration($settings, $predefSettings);
+        }
+        return $settings;
     }
 }

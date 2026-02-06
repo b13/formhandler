@@ -34,6 +34,8 @@ namespace Typoheads\Formhandler\Finisher;
  */
 class SubmittedOK extends AbstractFinisher
 {
+    protected ?string $templateFile = null;
+
     /**
      * The main method called by the controller
      *
@@ -41,20 +43,12 @@ class SubmittedOK extends AbstractFinisher
      */
     public function process()
     {
-
         //read template file
         $this->templateFile = $this->globals->getTemplateCode();
         if (isset($this->settings['templateFile'])) {
             $this->templateFile = $this->utilityFuncs->readTemplateFile(false, $this->settings);
         }
-
-        //set view
-        $viewClass = '\Typoheads\Formhandler\View\SubmittedOK';
-        if (isset($this->settings['view'])) {
-            $viewClass = $this->utilityFuncs->getSingle($this->settings, 'view');
-        }
-        $viewClass = $this->utilityFuncs->prepareClassName($viewClass);
-        $view = $this->componentManager->getComponent($viewClass);
+        $view = $this->componentManager->getComponent(\Typoheads\Formhandler\View\SubmittedOK::class);
 
         //show TEMPLATE_SUBMITTEDOK
         $view->setTemplate($this->templateFile, ('SUBMITTEDOK' . $this->globals->getTemplateSuffix()));

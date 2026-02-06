@@ -2,6 +2,7 @@
 
 namespace Typoheads\Formhandler\Utility;
 
+use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\SingletonInterface;
 
 /*                                                                        *
@@ -37,6 +38,17 @@ class Globals implements SingletonInterface
     protected static $submitted;
     protected static $templateCode;
     protected static $templateSuffix;
+    protected static ?ServerRequestInterface $request = null;
+
+    public static function setRequest(ServerRequestInterface $request): void
+    {
+        self::$request = $request;
+    }
+
+    public static function getRequest(): ?ServerRequestInterface
+    {
+        return self::$request;
+    }
 
     public static function setAjaxMode($mode): void
     {

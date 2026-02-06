@@ -170,14 +170,4 @@ class BackendTcPdf extends AbstractComponent
         $content = $this->pdf->Output($this->settings['fileName'], 'S');
         return $content;
     }
-
-    /**
-     * Sets the template code for the PDF
-     *
-     * @param string $templateCode The template code
-     */
-    public function setTemplateCode($templateCode): void
-    {
-        $this->templateCode = $templateCode;
-    }
 }

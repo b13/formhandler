@@ -233,7 +233,8 @@ class ModuleController extends ActionController
                     ->withHeader('Content-Type', 'application/pdf')
                     ->withHeader('Content-Disposition', 'attachment; filename="formhandler.pdf"')
                     ->withBody($this->streamFactory->createStream($content));
-            } elseif ($filetype === 'csv') {
+            }
+            if ($filetype === 'csv') {
                 $generator = $this->componentManager->getComponent(BackendCsv::class);
                 $this->settings['csv']['config']['records'] = $convertedLogDataRows;
                 $this->settings['csv']['config']['exportFields'] = $fields;

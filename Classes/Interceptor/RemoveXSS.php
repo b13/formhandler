@@ -21,6 +21,9 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class RemoveXSS extends AbstractInterceptor
 {
+    protected array $doNotSanitizeFields = [];
+    protected array $removeChars = [];
+
     /**
      * The main method called by the controller
      *
@@ -75,6 +78,7 @@ class RemoveXSS extends AbstractInterceptor
             return [];
         }
 
+        $sanitizedArray = [];
         foreach ($values as $key => $value) {
             if (!in_array($key, $this->doNotSanitizeFields) && is_array($value)) {
                 $sanitizedArray[$key] = $this->sanitizeValues($value);

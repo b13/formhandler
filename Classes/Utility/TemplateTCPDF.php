@@ -2,7 +2,6 @@
 
 namespace Typoheads\Formhandler\Utility;
 
-use TYPO3\CMS\Core\Http\ApplicationType;
 use TYPO3\CMS\Core\Localization\LanguageService;
 
 /*                                                                        *
@@ -22,26 +21,9 @@ use TYPO3\CMS\Core\Localization\LanguageService;
  */
 class TemplateTCPDF extends \TCPDF
 {
-    /**
-     * Path to language file
-     *
-     * @var string
-     */
-    protected $sysLangFile;
-
-    /**
-     * Text for the header
-     *
-     * @var string
-     */
-    protected $headerText;
-
-    /**
-     * Text for the footer
-     *
-     * @var string
-     */
-    protected $footerText;
+    protected string $sysLangFile;
+    protected string $headerText = '';
+    protected string $footerText = '';
 
     public function __construct()
     {
@@ -55,7 +37,7 @@ class TemplateTCPDF extends \TCPDF
     public function Header(): void
     {
         $headerText = $this->getHeaderText();
-        if (strlen($headerText ?? '') > 0) {
+        if (!empty($headerText)) {
             $this->SetY(5);
 
             $text = str_ireplace(
@@ -84,7 +66,7 @@ class TemplateTCPDF extends \TCPDF
 
         $footerText = $this->getFooterText();
 
-        if (strlen($footerText ?? '') > 0) {
+        if (!empty($footerText)) {
             $footerText = str_ireplace(
                 [
                     '###PDF_PAGE_NUMBER###',

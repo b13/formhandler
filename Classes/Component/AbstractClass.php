@@ -2,8 +2,8 @@
 
 namespace Typoheads\Formhandler\Component;
 
+use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
-use Typoheads\Formhandler\Controller\Configuration;
 use Typoheads\Formhandler\Utility\GeneralUtility;
 use Typoheads\Formhandler\Utility\Globals;
 
@@ -27,39 +27,23 @@ use Typoheads\Formhandler\Utility\Globals;
 abstract class AbstractClass
 {
     protected Manager $componentManager;
-    protected Configuration $configuration;
     protected Globals $globals;
     protected GeneralUtility $utilityFuncs;
-
-    /**
-     * The cObj
-     *
-     * @var ContentObjectRenderer
-     */
-    protected $cObj;
-
-    /**
-     * @var array
-     */
-    protected $settings;
+    protected ContentObjectRenderer $cObj;
+    protected array $settings = [];
+    protected ServerRequestInterface $request;
 
     /**
      * @var array
      */
     protected $validationStatusClasses;
 
-    /**
-     * The constructor for an interceptor setting the component manager and the configuration.
-     *
-     * @param Manager $componentManager
-     * @param Configuration $configuration
-     */
-    public function __construct(
-    ) {
+    public function __construct()
+    {
         $this->componentManager = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(Manager::class);
-        $this->configuration = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(Configuration::class);
         $this->globals = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(Globals::class);
         $this->utilityFuncs = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(GeneralUtility::class);
         $this->cObj = $this->globals->getCObj();
+        $this->request = $this->globals->getRequest();
     }
 }

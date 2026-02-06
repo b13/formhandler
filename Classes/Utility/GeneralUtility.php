@@ -3,7 +3,6 @@
 namespace Typoheads\Formhandler\Utility;
 
 use Symfony\Component\Mime\Address;
-use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Crypto\Random;
 use TYPO3\CMS\Core\SingletonInterface;
@@ -11,7 +10,6 @@ use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
-use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 
 /*                                                                        *
@@ -151,7 +149,7 @@ class GeneralUtility implements SingletonInterface
     /**
      * Read template file set in flexform or TypoScript, read the file's contents to $this->templateFile
      *
-     * @param $settings The formhandler settings
+     * @param array $settings The formhandler settings
      * @return string
      */
     public static function readTemplateFile($templateFile, &$settings)
@@ -443,37 +441,16 @@ class GeneralUtility implements SingletonInterface
 
     /**
      * Converts a date to a UNIX timestamp.
-     *
-     * @param array $options The TS settings of the "special" section
-     * @return long The timestamp
      */
     public static function dateToTimestamp($date, $format = 'Y-m-d')
     {
+        $timestamp = 0;
         if (strlen(trim($date)) > 0) {
-            if (version_compare(PHP_VERSION, '5.3.0') < 0) {
-
-                // find out separator
-                preg_match('/^[d|m|y]*(.)[d|m|y]*/i', $format, $res);
-                $sep = $res[1];
-
-                // normalisation of format
-                $pattern = self::normalizeDatePattern($format, $sep);
-
-                // find out correct positioins of "d","m","y"
-                $pos1 = strpos($pattern, 'd');
-                $pos2 = strpos($pattern, 'm');
-                $pos3 = strpos($pattern, 'y');
-
-                $dateParts = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode($sep, $date);
-                $timestamp = mktime(0, 0, 0, $dateParts[$pos2], $dateParts[$pos1], $dateParts[$pos3]);
+            $dateObj = \DateTime::createFromFormat($format, $date);
+            if ($dateObj) {
+                $timestamp = $dateObj->getTimestamp();
             } else {
-                $dateObj = \DateTime::createFromFormat($format, $date);
-                if ($dateObj) {
-                    $timestamp = $dateObj->getTimestamp();
-                } else {
-                    self::debugMessage('Error parsing the date. Supported formats: http://www.php.net/manual/en/datetime.createfromformat.php', [], 3, ['format' => $format, 'date' => $date]);
-                    $timestamp = 0;
-                }
+                $timestamp = 0;
             }
         }
         return $timestamp;
@@ -1057,31 +1034,6 @@ class GeneralUtility implements SingletonInterface
             $wrappedString = Globals::getCObj()->wrap($str, $settingsArray[$key]);
         }
         return $wrappedString;
-    }
-
-    public static function getAjaxUrl($specialParams)
-    {
-        $params = [
-            'id' => $GLOBALS['TSFE']->id,
-            'L' => \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('language', 'id'),
-            'randomID' => Globals::getRandomID(),
-            'field' => $field,
-            'uploadedFileName' => $uploadedFileName,
-        ];
-        $params = array_merge($params, $specialParams);
-        return \TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('TYPO3_SITE_PATH') . 'index.php?' . \TYPO3\CMS\Core\Utility\GeneralUtility::implodeArrayForUrl('', $params);
-    }
-
-    public static function prepareAndWhereString($andWhere)
-    {
-        $andWhere = trim($andWhere);
-        if (substr($andWhere, 0, 3) === 'AND') {
-            $andWhere = trim(substr($andWhere, 3));
-        }
-        if (strlen($andWhere) > 0) {
-            $andWhere = ' AND ' . $andWhere;
-        }
-        return $andWhere;
     }
 
     /**

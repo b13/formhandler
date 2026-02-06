@@ -2,10 +2,11 @@
 
 namespace Typoheads\Formhandler\Logger;
 
-use Psr\Http\Message\RequestInterface;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Frontend\Page\PageInformation;
+use Typoheads\Formhandler\Component\AbstractComponent;
 
 /*                                                                        *
  * This script is part of the TYPO3 project - inspiring people to share!  *
@@ -22,7 +23,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 /**
  * A logger to store submission information in TYPO3 database
  */
-class DB extends AbstractLogger
+class DB extends AbstractComponent
 {
     /**
      * Logs the given values.
@@ -44,7 +45,9 @@ class DB extends AbstractLogger
         $fields['crdate'] = time();
         $fields['pid'] = $this->utilityFuncs->getSingle($this->settings, 'pid');
         if (!$fields['pid']) {
-            $fields['pid'] = $GLOBALS['TSFE']->id;
+            /** @var PageInformation $pageInformation */
+            $pageInformation = $this->request->getAttribute('frontend.page.information');
+            $fields['pid'] = $pageInformation->getId();
         }
         ksort($this->gp);
         $keys = array_keys($this->gp);
@@ -88,10 +91,9 @@ class DB extends AbstractLogger
             $fields['is_spam'] = 1;
         }
 
-        $request = $this->getRequest();
-        if ($request !== null) {
+        if ($this->request !== null) {
             /** @var SiteLanguage $language */
-            $language = $request->getAttribute('language');
+            $language = $this->request->getAttribute('language');
             if ($language !== null) {
                 $fields['language'] = $language->getLanguageId();
             }
@@ -158,10 +160,5 @@ class DB extends AbstractLogger
             }
         }
         return $sortedParams;
-    }
-
-    protected function getRequest(): ?RequestInterface
-    {
-        return $GLOBALS['TYPO3_REQUEST'] ?? null;
     }
 }

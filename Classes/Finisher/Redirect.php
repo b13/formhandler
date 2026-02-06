@@ -27,34 +27,27 @@ namespace Typoheads\Formhandler\Finisher;
  */
 class Redirect extends AbstractFinisher
 {
-    /**
-     * The main method called by the controller
-     *
-     * @return array The probably modified GET/POST parameters
-     */
     public function process()
     {
-
         //read redirect page
         $redirectPage = $this->utilityFuncs->getSingle($this->settings, 'redirectPage');
         if (!isset($redirectPage)) {
             return $this->gp;
         }
         $this->globals->getSession()->reset();
-
         $this->utilityFuncs->doRedirectBasedOnSettings($this->settings, $this->gp);
     }
 
     /**
      * Method to set GET/POST for this class and load the configuration
      *
-     * @param array The GET/POST values
-     * @param array The TypoScript configuration
+     * @param array $gp The GET/POST values
+     * @param array $settings The TypoScript configuration
      */
-    public function init($gp, $tsConfig): void
+    public function init($gp, $settings): void
     {
         $this->gp = $gp;
-        $this->settings = $tsConfig;
+        $this->settings = $settings;
         $redirect = $this->utilityFuncs->pi_getFFvalue($this->cObj->data['pi_flexform'], 'redirect_page', 'sMISC');
         if ($redirect) {
             $this->settings['redirectPage'] = $redirect;

@@ -18,7 +18,7 @@ namespace Typoheads\Formhandler\View;
 /**
  * A view for Finisher_SubmittedOK used by Formhandler
  */
-class SubmittedOK extends Form
+class SubmittedOK extends FormView
 {
     /**
      * This function fills the default markers:

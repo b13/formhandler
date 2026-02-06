@@ -3,10 +3,6 @@
 namespace Typoheads\Formhandler\Mailer;
 
 use TYPO3\CMS\Core\Mail\MailMessage;
-use Typoheads\Formhandler\Component\Manager;
-use Typoheads\Formhandler\Controller\Configuration;
-use Typoheads\Formhandler\Utility\GeneralUtility;
-use Typoheads\Formhandler\Utility\Globals;
 
 /*                                                                        *
  * This script is part of the TYPO3 project - inspiring people to share!  *
@@ -30,18 +26,10 @@ class TYPO3Mailer extends AbstractMailer implements MailerInterface
      */
     protected $emailObj;
 
-    /**
-     * Initializes the email object and calls the parent constructor
-     *
-     * @param Manager $componentManager
-     * @param Configuration $configuration
-     * @param Globals $globals
-     * @param GeneralUtility $utilityFuncs
-     */
-    public function __construct(
-    ) {
+    public function __construct()
+    {
         parent::__construct();
-        $this->emailObj = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\CMS\Core\Mail\MailMessage');
+        $this->emailObj = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(MailMessage::class);
     }
 
     /* (non-PHPdoc)

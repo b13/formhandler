@@ -2,11 +2,12 @@
 
 namespace Typoheads\Formhandler\View;
 
-use ThinkopenAt\Captcha\Utility;
-use TYPO3\CMS\Core\Information\Typo3Version;
-use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+use TYPO3\CMS\Core\Service\MarkerBasedTemplateService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\HttpUtility;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
+use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
+use Typoheads\Formhandler\Component\AbstractClass;
 
 /*                                                                        *
  * This script is part of the TYPO3 project - inspiring people to share!  *
@@ -23,7 +24,7 @@ use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 /**
  * A default view for Formhandler
  */
-class Form extends AbstractView
+class FormView extends AbstractClass
 {
     /**
      * An array of fields to do not encode for output
@@ -32,7 +33,23 @@ class Form extends AbstractView
      */
     protected $disableEncodingFields;
 
+    protected array $settings = [];
+    protected array $errors = [];
+    protected ?string $predefined = null;
+    protected array $componentSettings = [];
+
     protected ?array $masterTemplates = null;
+    protected array $gp = [];
+    protected ?string $template = null;
+    protected ?array $langFiles = null;
+    protected array $subparts = [];
+    protected MarkerBasedTemplateService $templateService;
+
+    public function __construct()
+    {
+        $this->templateService = GeneralUtility::makeInstance(MarkerBasedTemplateService::class);
+        parent::__construct();
+    }
 
     /**
      * Main method called by the controller.
@@ -392,7 +409,7 @@ class Form extends AbstractView
      */
     protected function fillDefaultMarkers()
     {
-        $parameters = $GLOBALS['TYPO3_REQUEST']->getQueryParams();
+        $parameters = $this->request->getQueryParams();
         if (isset($parameters['id'])) {
             unset($parameters['id']);
         }
@@ -584,7 +601,7 @@ class Form extends AbstractView
         foreach ($allJumpToStepSubmits[0] as $idx => $allJumpToStepSubmit) {
             $step = (int)($allJumpToStepSubmits[1][$idx]);
             $action = 'next';
-            if ($step < $this->currentStep) {
+            if ($step < $currentStepFromSession) {
                 $action = 'prev';
             }
             $submitName = ' name="' . str_replace('#action#', $action, $name) . '" ';
@@ -592,19 +609,6 @@ class Form extends AbstractView
             $markers['###submit_step_' . $step . '###'] = $submitName;
         }
 
-        // step bar
-        $prevName = str_replace('#action#', 'prev', $name);
-        $prevName = str_replace('#step#', $currentStepFromSession - 1, $prevName);
-        $nextName = str_replace('#action#', 'next', $name);
-        $nextName = str_replace('#step#', $currentStepFromSession + 1, $nextName);
-        $markers['###step_bar###'] = $this->createStepBar(
-            $currentStepFromSession,
-            $this->globals->getSession()->get('totalSteps'),
-            $prevName,
-            $nextName
-        );
-
-        $this->fillCaptchaMarkers($markers);
         $this->fillFEUserMarkers($markers);
         $this->fillFileMarkers($markers);
 
@@ -620,54 +624,16 @@ class Form extends AbstractView
     }
 
     /**
-     * Fills the markers for the supported captcha extensions.
-     *
-     * @param array &$markers Reference to the markers array
-     */
-    protected function fillCaptchaMarkers(&$markers)
-    {
-        if (stristr($this->template, '###CAPTCHA###') && ExtensionManagementUtility::isLoaded('captcha')) {
-            $markers['###CAPTCHA###'] = Utility::makeCaptcha();
-            $markers['###captcha###'] = $markers['###CAPTCHA###'];
-        }
-        if (stristr($this->template, '###SR_FREECAP_IMAGE###') && ExtensionManagementUtility::isLoaded('sr_freecap')) {
-            require_once(ExtensionManagementUtility::extPath('sr_freecap') . 'pi2/class.tx_srfreecap_pi2.php');
-            $this->freeCap = GeneralUtility::makeInstance('tx_srfreecap_pi2');
-            $markers = array_merge($markers, $this->freeCap->makeCaptcha());
-        }
-        if (stristr($this->template, '###RECAPTCHA###') && ExtensionManagementUtility::isLoaded('jm_recaptcha')) {
-            require_once(ExtensionManagementUtility::extPath('jm_recaptcha') . 'class.tx_jmrecaptcha.php');
-            $this->recaptcha = new \tx_jmrecaptcha();
-            $markers['###RECAPTCHA###'] = $this->recaptcha->getReCaptcha();
-            $markers['###recaptcha###'] = $markers['###RECAPTCHA###'];
-        }
-
-        if (stristr($this->template, '###WT_CALCULATING_CAPTCHA###') && ExtensionManagementUtility::isLoaded('wt_calculating_captcha')) {
-            require_once(ExtensionManagementUtility::extPath('wt_calculating_captcha') . 'class.tx_wtcalculatingcaptcha.php');
-
-            $captcha = GeneralUtility::makeInstance('tx_wtcalculatingcaptcha');
-            $markers['###WT_CALCULATING_CAPTCHA###'] = $captcha->generateCaptcha();
-            $markers['###wt_calculating_captcha###'] = $markers['###WT_CALCULATING_CAPTCHA###'];
-        }
-
-        if (stristr($this->template, '###MATHGUARD###') && ExtensionManagementUtility::isLoaded('mathguard')) {
-            require_once(ExtensionManagementUtility::extPath('mathguard') . 'class.tx_mathguard.php');
-
-            $captcha = GeneralUtility::makeInstance('tx_mathguard');
-            $markers['###MATHGUARD###'] = $captcha->getCaptcha();
-            $markers['###mathguard###'] = $markers['###MATHGUARD###'];
-        }
-    }
-
-    /**
      * Fills the markers ###FEUSER_[property]### with the data from $GLOBALS["TSFE"]->fe_user->user.
      *
      * @param array &$markers Reference to the markers array
      */
     protected function fillFEUserMarkers(&$markers)
     {
-        if (!empty($this->frontendUserAuthentication->user)) {
-            foreach ($this->frontendUserAuthentication->user as $k => $v) {
+        /** @var FrontendUserAuthentication $userAuthentication */
+        $userAuthentication = $this->request->getAttribute('frontend.user');
+        if (!empty($userAuthentication->user)) {
+            foreach ($userAuthentication->user as $k => $v) {
                 $markers['###FEUSER_' . strtoupper($k) . '###'] = $v;
                 $markers['###FEUSER_' . strtolower($k) . '###'] = $v;
                 $markers['###feuser_' . strtoupper($k) . '###'] = $v;
@@ -698,17 +664,17 @@ class Form extends AbstractView
         $flexformValue = $this->utilityFuncs->pi_getFFvalue($this->cObj->data['pi_flexform'] ?? null, 'required_fields', 'sMISC');
         if ($flexformValue) {
             $fields = GeneralUtility::trimExplode(',', $flexformValue);
+            $index = 1;
             if (is_array($settings['validators.'])) {
 
                 // Searches the index of Tx_Formhandler_Validator_Default
-                foreach ($settings['validators.'] as $index => $validator) {
+                foreach ($settings['validators.'] as $i => $validator) {
                     $currentValidatorClass = $this->utilityFuncs->getPreparedClassName($validator);
+                    $index = $i;
                     if ($currentValidatorClass === 'Tx_Formhandler_Validator_Default') {
                         break;
                     }
                 }
-            } else {
-                $index = 1;
             }
 
             // Adds the value.
@@ -785,10 +751,6 @@ class Form extends AbstractView
                                                 break;
                                             case 'required':
                                             case 'fileRequired':
-                                            case 'jmRecaptcha':
-                                            case 'captcha':
-                                            case 'srFreecap':
-                                            case 'mathGuard':
                                                 if (!in_array('all', $disableErrorCheckFields) && !in_array($replacedFieldname, $disableErrorCheckFields)) {
                                                     $markers['###required_' . $replacedFieldname . '###'] = $requiredSign;
                                                     $markers['###requiredMarker_' . $replacedFieldname . '###'] = $requiredMarker;
@@ -933,6 +895,7 @@ class Form extends AbstractView
     protected function fillIsErrorMarkers($errors)
     {
         $markers = [];
+        $errorMessage = '';
         foreach ($errors as $field => $types) {
             if ($this->settings['isErrorMarker.'][$field] ?? []) {
                 $errorMessage = $this->utilityFuncs->getSingle($this->settings['isErrorMarker.'], $field);
@@ -1216,97 +1179,90 @@ class Form extends AbstractView
         $this->template = $this->templateService->substituteMarkerArray($this->template, $langMarkers);
     }
 
-    /**
-     * improved copy from dam_index
-     *
-     * Returns HTML of a box with a step counter and "back" and "next" buttons
-     * Use label "next"/"prev" or "next_[stepnumber]"/"prev_[stepnumber]" for specific step in language file as button text.
-     *
-     * <code>
-     * #set background color
-     * plugin.Tx_Formhandler.settings.stepbar_color = #EAEAEA
-     * #use default CSS, written to temp file
-     * plugin.Tx_Formhandler.settings.useDefaultStepBarStyles = 1
-     * </code>
-     *
-     * @author Johannes Feustel
-     * @param    int $currentStep current step (begins with 1)
-     * @param    int $lastStep last step
-     * @param    string $buttonNameBack name attribute of the back button
-     * @param    string $buttonNameFwd name attribute of the forward button
-     * @return    string    HTML code
-     */
-    protected function createStepBar($currentStep, $lastStep, $buttonNameBack = '', $buttonNameFwd = '')
+    public function setLangFiles($langFiles): void
     {
+        $this->langFiles = $langFiles;
+    }
 
-        //colors
-        $bgcolor = '#EAEAEA';
-        $bgcolor = $this->settings['stepbar_color'] ?? $bgcolor;
+    /**
+     * Sets the settings
+     *
+     * @param array $settings The settings
+     */
+    public function setSettings($settings): void
+    {
+        $this->settings = $settings;
+    }
 
-        $nrcolor = \Typoheads\Formhandler\Utility\GeneralUtility::modifyHTMLcolor($bgcolor, 30, 30, 30);
-        $errorbgcolor = '#dd7777';
-        $errornrcolor = \Typoheads\Formhandler\Utility\GeneralUtility::modifyHTMLcolor($errorbgcolor, 30, 30, 30);
+    public function setComponentSettings($settings): void
+    {
+        $this->componentSettings = $settings;
+    }
 
-        $classprefix = $this->globals->getFormValuesPrefix() . '_stepbar';
+    public function getComponentSettings()
+    {
+        return $this->componentSettings;
+    }
 
-        $css = [];
-        $css[] = '.' . $classprefix . ' { background:' . $bgcolor . '; padding:4px;}';
-        $css[] = '.' . $classprefix . '_error { background: ' . $errorbgcolor . ';}';
-        $css[] = '.' . $classprefix . '_steps { margin-left:50px; margin-right:25px; vertical-align:middle; font-family:Verdana,Arial,Helvetica; font-size:22px; font-weight:bold; }';
-        $css[] = '.' . $classprefix . '_steps span { color:' . $nrcolor . '; margin-left:5px; margin-right:5px; }';
-        $css[] = '.' . $classprefix . '_error .' . $classprefix . '_steps span { color:' . $errornrcolor . '; margin-left:5px; margin-right:5px; }';
-        $css[] = '.' . $classprefix . '_steps .' . $classprefix . '_currentstep { color:  #000;}';
-        $css[] = '#stepsFormButtons { margin-left:25px;vertical-align:middle;}';
+    /**
+     * Sets the key of the chosen predefined form
+     *
+     * @param string $key The key of the predefined form
+     */
+    public function setPredefined($key): void
+    {
+        $this->predefined = $key;
+    }
 
-        $content = '';
-        $buttons = '';
+    /**
+     * Sets the template of the view
+     *
+     * @param string $templateCode The whole template code of a template file
+     * @param string $templateName Name of a subpart containing the template code to work with
+     * @param bool $forceTemplate Not needed
+     */
+    public function setTemplate($templateCode, $templateName, $forceTemplate = false): void
+    {
+        $this->subparts['template'] = $this->templateService->getSubpart($templateCode, '###TEMPLATE_' . $templateName . '###');
+        $this->subparts['item'] = $this->templateService->getSubpart($this->subparts['template'], '###ITEM###');
+    }
 
-        for ($i = 1; $i <= $lastStep; $i++) {
-            $class = '';
-            if ($i == $currentStep) {
-                $class = 'class="' . $classprefix . '_currentstep"';
-            }
-            $stepName = (string)$this->utilityFuncs->getTranslatedMessage($this->langFiles, 'step-' . $i);
-            if (strlen($stepName) === 0) {
-                $stepName = $i;
-            }
-            $content .= '<span ' . $class . ' >' . $stepName . '</span>';
-        }
-        $content = '<span class="' . $classprefix . '_steps' . '">' . $content . '</span>';
+    /**
+     * Returns false if the view doesn't have template code.
+     *
+     * @return bool
+     */
+    public function hasTemplate()
+    {
+        return !empty($this->subparts['template']);
+    }
 
-        //if not the first step, show back button
-        if ($currentStep > 1) {
-            //check if label for specific step
-            $message = (string)$this->utilityFuncs->getTranslatedMessage($this->langFiles, 'prev_' . $currentStep);
-            if (strlen($message) === 0) {
-                $message = (string)$this->utilityFuncs->getTranslatedMessage($this->langFiles, 'prev');
-            }
-            $buttons .= '<input type="submit" name="' . $buttonNameBack . '" value="' . trim($message) . '" class="button_prev" style="margin-right:10px;" />';
-        }
-        $message = (string)$this->utilityFuncs->getTranslatedMessage($this->langFiles, 'next_' . $currentStep);
-        if (strlen($message) === 0) {
-            $message = $this->utilityFuncs->getTranslatedMessage($this->langFiles, 'next');
-        }
-        $buttons .= '<input type="submit" name="' . $buttonNameFwd . '" value="' . trim((string)$message) . '" class="button_next" />';
-
-        $content .= '<span id="stepsFormButtons">' . $buttons . '</span>';
-
-        //wrap
-        $classes = $classprefix;
-        if ($this->errors) {
-            $classes = $classes . ' ' . $classprefix . '_error';
-        }
-        $content = '<div class="' . $classes . '" >' . $content . '</div>';
-
-        //add default css to page
-        if (isset($this->settings['useDefaultStepBarStyles'])) {
-            $css = implode("\n", $css);
-            $css = TSpagegen::inline2TempFile($css, 'css');
-            if (version_compare(GeneralUtility::makeInstance(Typo3Version::class)->getVersion(), '4.3.0') >= 0) {
-                $css = '<link rel="stylesheet" type="text/css" href="' . htmlspecialchars($css) . '" />';
-            }
-            $GLOBALS['TSFE']->additionalHeaderData[$this->extKey . '_' . $classprefix] .= $css;
-        }
+    public function pi_wrapInBaseClass($str)
+    {
+        $content = '<div class="Tx-Formhandler">
+		' . $str . '
+	</div>
+	';
         return $content;
+    }
+
+    public function pi_getPageLink($id, $target = '', $urlParameters = [])
+    {
+        $conf = [
+            'parameter' => $id,
+        ];
+        if ($target) {
+            $conf['target'] = $target;
+            $conf['extTarget'] = $target;
+            $conf['fileTarget'] = $target;
+        }
+        if (is_array($urlParameters)) {
+            if (!empty($urlParameters)) {
+                $conf['additionalParams'] = HttpUtility::buildQueryString($urlParameters, '&');
+            }
+        } else {
+            $conf['additionalParams'] = $urlParameters;
+        }
+        return $this->cObj->createUrl($conf);
     }
 }

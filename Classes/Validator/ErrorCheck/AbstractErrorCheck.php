@@ -24,7 +24,13 @@ abstract class AbstractErrorCheck extends AbstractComponent
     protected $formFieldName;
     protected $mandatoryParameters = [];
 
-    public function process() {}
+    /**
+     * @return array
+     */
+    public function process()
+    {
+        return [];
+    }
 
     public function setFormFieldName($name): void
     {

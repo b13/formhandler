@@ -22,19 +22,7 @@ namespace Typoheads\Formhandler\Component;
  */
 abstract class AbstractComponent extends AbstractClass
 {
-    /**
-     * The GET/POST parameters
-     *
-     * @var array
-     */
-    protected $gp;
-
-    /**
-     * Settings
-     *
-     * @var array
-     */
-    protected $settings;
+    protected array $gp = [];
 
     /**
      * Initialize the class variables
@@ -48,11 +36,6 @@ abstract class AbstractComponent extends AbstractClass
         $this->settings = $settings;
     }
 
-    /**
-     * The main method called by the controller
-     *
-     * @return array The probably modified GET/POST parameters
-     */
     abstract public function process();
 
     public function validateConfig()

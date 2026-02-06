@@ -54,6 +54,7 @@ class Dispatcher extends AbstractPlugin
 
         //init flexform
         $this->pi_initPIflexForm();
+        $this->pi_loadLL();
 
         /*
          * Parse values from flexform:
@@ -69,18 +70,11 @@ class Dispatcher extends AbstractPlugin
         $predef = $this->pi_getFFvalue($this->cObj->data['pi_flexform'], 'predefined', 'sDEF');
 
         $this->globals->setCObj($this->cObj);
+        $this->globals->setRequest($this->request);
         $this->globals->getCObj()->setCurrentVal($predef);
         $this->globals->setPredef($predef);
 
-        /*
-         * set controller:
-         * 1. Default controller
-         * 2. TypoScript
-         */
-        $controllerClassName = Form::class;
-
-        /** @var AbstractController $controller */
-        $controller = GeneralUtility::makeInstance($controllerClassName);
+        $controller = GeneralUtility::makeInstance(FormController::class);
 
         if (strlen($templateFile) > 0) {
             $controller->setTemplateFile($templateFile);

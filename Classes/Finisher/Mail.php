@@ -2,8 +2,11 @@
 
 namespace Typoheads\Formhandler\Finisher;
 
+use TYPO3\CMS\Core\Service\MarkerBasedTemplateService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Typoheads\Formhandler\Mailer\MailerInterface;
+use Typoheads\Formhandler\Mailer\TYPO3Mailer;
+use Typoheads\Formhandler\View\MailView;
 
 /*                                                                        *
  * This script is part of the TYPO3 project - inspiring people to share!  *
@@ -71,6 +74,14 @@ class Mail extends AbstractFinisher
 {
     protected MailerInterface $emailObj;
     protected ?string $predefined = null;
+    protected MarkerBasedTemplateService $templateService;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->templateService = GeneralUtility::makeInstance(MarkerBasedTemplateService::class);
+    }
+
     /**
      * The main method called by the controller
      *
@@ -90,18 +101,8 @@ class Mail extends AbstractFinisher
 
     protected function initMailer($type)
     {
-        //init mailer object
-        $globalSettings = $this->globals->getSettings();
-        if (is_array($this->settings['mailer.'] ?? null)) {
-            $emailClass = $this->utilityFuncs->getPreparedClassName($this->settings['mailer.'], 'Mailer\TYPO3Mailer');
-        } elseif (is_array($globalSettings['mailer.'] ?? null)) {
-            $emailClass = $this->utilityFuncs->getPreparedClassName($globalSettings['mailer.'], 'Mailer\TYPO3Mailer');
-        } else {
-            $emailClass = $this->utilityFuncs->prepareClassName('\\Typoheads\\Formhandler\\Mailer\\TYPO3Mailer');
-        }
-
-        $this->emailObj = $this->componentManager->getComponent($emailClass);
-        $this->emailObj->init($this->gp, $this->settings['mailer.']['config.'] ?? null);
+        $this->emailObj = $this->componentManager->getComponent(TYPO3Mailer::class);
+        $this->emailObj->init($this->gp, []);
 
         $this->settings = $this->parseEmailSettings($this->settings, $type);
 
@@ -130,13 +131,7 @@ class Mail extends AbstractFinisher
      */
     protected function parseTemplate($mode, $suffix)
     {
-        $viewClass = $this->utilityFuncs->getSingle($this->settings, 'view');
-        if (!$viewClass) {
-            $viewClass = '\\Typoheads\\Formhandler\\View\\Mail';
-        }
-
-        /* @var $view Tx_Formhandler_AbstractView */
-        $view = $this->componentManager->getComponent($viewClass);
+        $view = $this->componentManager->getComponent(MailView::class);
 
         $view->setLangFiles($this->globals->getLangFiles());
         $view->setPredefined($this->predefined ?? null);
@@ -173,6 +168,7 @@ class Mail extends AbstractFinisher
         }
 
         $mailSettings = $this->settings[$type];
+        $template = [];
 
         $plain = (string)$this->parseTemplate($type, 'plain');
         if (strlen(trim($plain)) > 0) {
@@ -511,20 +507,10 @@ class Mail extends AbstractFinisher
             } else {
                 $langMarkers = $this->utilityFuncs->getFilledLangMarkers($value, $this->globals->getLangFiles());
                 if (!empty($langMarkers)) {
-                    $value = $this->markerBasedTemplateService->substituteMarkerArray($value, $langMarkers);
+                    $value = $this->templateService->substituteMarkerArray($value, $langMarkers);
                 }
             }
         }
-    }
-
-    /**
-     * Fetches the global TypoScript settings of the Formhandler
-     *
-     * @return array The settings
-     */
-    protected function getSettings()
-    {
-        return $this->configuration->getSettings();
     }
 
     /**
@@ -533,10 +519,10 @@ class Mail extends AbstractFinisher
      * @param array The GET/POST values
      * @param array The TypoScript configuration
      */
-    public function init($gp, $tsConfig): void
+    public function init($gp, $settings): void
     {
         $this->gp = $gp;
-        $this->settings = $tsConfig;
+        $this->settings = $settings;
     }
 
     /**

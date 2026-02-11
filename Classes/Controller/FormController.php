@@ -37,8 +37,9 @@ class FormController extends AbstractClass
     protected bool $submitted = false; // flag indicating if the form got submitted
 
     protected ?\Typoheads\Formhandler\View\FormView $view = null;
-    protected int $currentStep = 0;
-    protected int $lastStep = 0;
+
+    protected int $currentStep = 2;
+    protected int $lastStep = 1;
     protected int $totalSteps = 0;
     protected bool $finished = false;
 
@@ -77,23 +78,6 @@ class FormController extends AbstractClass
     protected function processSubmitted(): ResponseInterface
     {
 
-        /*
-         * Step may have been set to the next step already.
-         * Set the settings back to the one of the previous step
-         * to run the right interceptors and validators.
-         */
-        if ($this->currentStep > $this->lastStep) {
-            $this->loadSettingsForStep($this->lastStep);
-        } else {
-            $this->loadSettingsForStep($this->currentStep);
-        }
-
-        if ($this->currentStep > $this->lastStep) {
-            $this->loadSettingsForStep($this->lastStep);
-        } else {
-            $this->loadSettingsForStep($this->currentStep);
-        }
-
         //run init interceptors
         $this->addFormhandlerClass($this->settings['initInterceptors.'], RemoveXSS::class);
         $output = $this->runClasses($this->settings['initInterceptors.'] ?? []);
@@ -114,12 +98,6 @@ class FormController extends AbstractClass
                 }
             }
             $this->globals->setGP($this->gp);
-        }
-
-        if ($this->currentStep > $this->lastStep) {
-            $this->loadSettingsForStep($this->lastStep);
-        } else {
-            $this->loadSettingsForStep($this->currentStep);
         }
 
         $this->globals->setRandomID($this->gp['randomID'] ?? null);
@@ -175,7 +153,6 @@ class FormController extends AbstractClass
 
         //if form is valid
         if ($this->isValid($valid)) {
-            $this->loadSettingsForStep($this->currentStep);
 
             //read template file
             $this->templateFile = $this->utilityFuncs->readTemplateFile($this->templateFile, $this->settings);
@@ -285,8 +262,6 @@ class FormController extends AbstractClass
             $this->currentStep = $this->lastStep;
         }
 
-        //load settings from last step again because an error occurred
-        $this->loadSettingsForStep($this->currentStep);
         $this->globals->getSession()->set('settings', $this->settings);
 
         //read template file
@@ -390,7 +365,6 @@ class FormController extends AbstractClass
      */
     protected function processNotSubmitted(): ResponseInterface
     {
-        $this->loadSettingsForStep($this->currentStep);
 
         $this->view->setSettings($this->settings);
 
@@ -413,8 +387,6 @@ class FormController extends AbstractClass
             return $output->response;
         }
 
-        //Parse conditions again. An interceptor might have added additional values.
-        $this->loadSettingsForStep($this->currentStep);
         $content = $this->view->render($this->gp, $this->errors);
         return $this->responseFactory->createResponse()
             ->withBody($this->streamFactory->createStream($content));
@@ -660,13 +632,7 @@ class FormController extends AbstractClass
      */
     protected function storeGPinSession()
     {
-        if ($this->currentStep > $this->lastStep) {
-            $this->loadSettingsForStep($this->lastStep);
-        }
-        $newGP = $this->handleCheckBoxFields();
-        if ($this->currentStep > $this->lastStep) {
-            $this->loadSettingsForStep($this->currentStep);
-        }
+        $newGP = $this->utilityFuncs->getMergedGP();
         $data = $this->globals->getSession()->get('values');
 
         $checkBoxFields = $this->utilityFuncs->getSingle($this->settings, 'checkBoxFields');
@@ -993,21 +959,6 @@ class FormController extends AbstractClass
     }
 
     /**
-     * Loads form settings for a given step
-     *
-     * @param int $step The step to load the settings for
-     */
-    protected function loadSettingsForStep($step)
-    {
-
-        //merge settings with specific settings for current step
-        if (isset($this->settings[$step . '.']) && is_array($this->settings[$step . '.'])) {
-            $this->settings = $this->utilityFuncs->mergeConfiguration($this->settings, $this->settings[$step . '.']);
-        }
-        $this->globals->getSession()->set('settings', $this->settings);
-    }
-
-    /**
      * Merges the current GET/POST parameters with the stored ones in SESSION
      */
     protected function mergeGPWithSession()
@@ -1161,37 +1112,6 @@ class FormController extends AbstractClass
             }
         }
         return $valid;
-    }
-
-    /**
-     * Checks if there are checkbox fields configured for this step.
-     * If found, Formhandler sets the correct value of the field(s)
-     *
-     * @return array
-     */
-    protected function handleCheckBoxFields()
-    {
-        $newGP = $this->utilityFuncs->getMergedGP();
-
-        //check for checkbox fields using the values in $newGP
-        if (isset($this->settings['checkBoxFields'])) {
-            $checkBoxFields = $this->utilityFuncs->getSingle($this->settings, 'checkBoxFields');
-            $fields = GeneralUtility::trimExplode(',', $checkBoxFields);
-            foreach ($fields as $idx => $field) {
-                if (!isset($newGP[$field]) && isset($this->gp[$field]) && $this->lastStep < $this->currentStep) {
-                    $this->gp[$field] = $newGP[$field] = [];
-
-                    //Insert default checkbox values
-                } elseif (!isset($newGP[$field]) && $this->lastStep < $this->currentStep) {
-                    if (is_array($this->settings['checkBoxUncheckedValue.'] ?? null) && isset($this->settings['checkBoxUncheckedValue.'][$field])) {
-                        $this->gp[$field] = $newGP[$field] = $this->utilityFuncs->getSingle($this->settings['checkBoxUncheckedValue.'], $field);
-                    } elseif (isset($this->settings['checkBoxUncheckedValue'])) {
-                        $this->gp[$field] = $newGP[$field] = $this->utilityFuncs->getSingle($this->settings, 'checkBoxUncheckedValue');
-                    }
-                }
-            }
-        }
-        return $newGP;
     }
 
     /**

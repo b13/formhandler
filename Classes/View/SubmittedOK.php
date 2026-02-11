@@ -36,17 +36,6 @@ class SubmittedOK extends FormView
         } else {
             $params = $this->gp;
         }
-        if (isset($this->componentSettings['actions.'])) {
-            foreach ($this->componentSettings['actions.'] as $action => $options) {
-                $sanitizedAction = str_replace('.', '', $action);
-                $class = $this->utilityFuncs->getPreparedClassName($options);
-                if ($class) {
-                    $generator = $this->componentManager->getComponent($class);
-                    $generator->init($this->gp, $options['config.']);
-                    $markers['###' . strtoupper($sanitizedAction) . '_LINK###'] = $generator->getLink($params);
-                }
-            }
-        }
         $this->fillFEUserMarkers($markers);
         $this->fillFileMarkers($markers);
         $this->template = $this->templateService->substituteMarkerArray($this->template, $markers);

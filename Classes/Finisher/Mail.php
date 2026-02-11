@@ -610,29 +610,6 @@ class Mail extends AbstractFinisher
                         $emailSettings[$option] = $this->parseEmbedFilesList($currentSettings);
                         break;
 
-                    case 'attachPDF':
-                    case 'attachGeneratedFiles':
-                        if (isset($currentSettings['attachGeneratedFiles.']) && is_array($currentSettings['attachGeneratedFiles.'])) {
-                            foreach ($currentSettings['attachGeneratedFiles.'] as $options) {
-                                $generatorClass = $this->utilityFuncs->getPreparedClassName($options);
-                                if ($generatorClass) {
-                                    $generator = $this->componentManager->getComponent($generatorClass);
-                                    $generator->init($this->gp, $options['config.']);
-                                    $generator->getLink([]);
-                                    $file = $generator->process();
-                                    $emailSettings['attachGeneratedFiles'] .= $file . ',';
-                                }
-                            }
-                            if (substr($emailSettings['attachGeneratedFiles'], strlen($emailSettings['attachGeneratedFiles']) - 1) === ',') {
-                                $emailSettings['attachGeneratedFiles'] = substr($emailSettings['attachGeneratedFiles'], 0, strlen($emailSettings['attachGeneratedFiles']) - 1);
-                            }
-                            unset($currentSettings['attachGeneratedFiles.']);
-                            $currentSettings['attachGeneratedFiles'] = $emailSettings['attachGeneratedFiles'];
-                        } elseif (isset($currentSettings['attachGeneratedFiles'])) {
-                            $emailSettings['attachGeneratedFiles'] = $currentSettings['attachGeneratedFiles'];
-                        }
-                        break;
-
                     case 'htmlEmailAsAttachment':
                         $htmlEmailAsAttachment = (string)$this->utilityFuncs->getSingle($currentSettings, 'htmlEmailAsAttachment');
                         if ((int)$htmlEmailAsAttachment === 1) {

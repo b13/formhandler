@@ -167,16 +167,6 @@ class FormController extends AbstractClass
             $this->storeGPinSession();
             $this->mergeGPWithSession();
 
-            //mark step as finished
-            $finishedSteps = $this->globals->getSession()->get('finishedSteps');
-            if (!is_array($finishedSteps)) {
-                $finishedSteps = [];
-            }
-
-            if ($this->currentStep > $this->lastStep && !in_array($this->currentStep - 1, $finishedSteps)) {
-                $finishedSteps[] = $this->currentStep - 1;
-            }
-            $this->globals->getSession()->set('finishedSteps', $finishedSteps);
 
             //if no more steps
             if ($this->finished) {
@@ -675,87 +665,11 @@ class FormController extends AbstractClass
             'inserted_tstamp' => null,
             'key_hash' => null,
             'finished' => null,
-            'finishedSteps' => [],
         ];
         $this->globals->getSession()->setMultiple($values);
         $this->gp = $gp;
         $this->currentStep = 1;
         $this->globals->setGP($this->gp);
-    }
-
-    /**
-     * Searches for current step and sets $this->currentStep according
-     */
-    protected function findCurrentStep()
-    {
-        $action = null;
-        $step = null;
-        if (isset($this->gp) && is_array($this->gp)) {
-            $action = 'reload';
-            $keys = array_keys($this->gp);
-            foreach ($keys as $idx => $pname) {
-                if (strstr($pname, 'step-')) {
-                    preg_match_all('/step-([0-9]+)-([a-z]+)/', $pname, $matches);
-                    if (isset($matches[2][0])) {
-                        $action = $matches[2][0];
-                        $step = (int)($matches[1][0]);
-                    }
-                }
-            }
-        }
-
-        $allowStepJumps = false;
-        if (isset($this->settings['allowStepJumps'])) {
-            $allowStepJumps = (bool)$this->utilityFuncs->getSingle($this->settings, 'allowStepJumps');
-        }
-        $stepInSession = max((int)($this->globals->getSession()->get('currentStep')), 1);
-        switch ($action) {
-            case 'prev':
-            case 'next':
-                if ($step > $stepInSession) {
-                    if ($allowStepJumps) {
-                        $this->currentStep = $step;
-                    } else {
-                        $this->currentStep = $stepInSession + 1;
-                    }
-                } elseif ($step < $stepInSession) {
-                    if ($allowStepJumps) {
-                        $this->currentStep = $step;
-                    } else {
-                        $this->currentStep = $stepInSession - 1;
-                    }
-                } else {
-                    $this->currentStep = $step;
-                }
-                break;
-            default:
-                $this->currentStep = $stepInSession;
-                break;
-        }
-        if ($this->currentStep < 1) {
-            $this->currentStep = 1;
-        }
-        if (!$this->currentStep) {
-            $this->currentStep = 1;
-        }
-
-        $isValidStep = true;
-        $disableStepCheck = false;
-        if (isset($this->settings['disableStepCheck'])) {
-            $disableStepCheck = (bool)$this->utilityFuncs->getSingle($this->settings, 'disableStepCheck');
-        }
-        if (!$disableStepCheck) {
-            for ($i = 1; $i < $this->currentStep - 1; $i++) {
-                $finishedSteps = $this->globals->getSession()->get('finishedSteps');
-                if (is_array($finishedSteps) && !in_array($i, $finishedSteps)) {
-                    $isValidStep = false;
-                }
-            }
-        }
-
-        if (!$isValidStep) {
-            $this->utilityFuncs->throwException('You are not allowed to go to this step!');
-        }
     }
 
     /**
@@ -875,16 +789,11 @@ class FormController extends AbstractClass
         if ($this->globals->getSession()->get('creationTstamp') === null) {
             if ($this->submitted) {
                 $this->reset($this->gp);
-                $this->findCurrentStep();
-                $this->globals->getSession()->set('currentStep', $this->currentStep);
             } else {
                 $this->reset();
             }
         }
 
-        $this->addCSS();
-        $this->addJS();
-        $this->addJSFooter();
 
         $this->view = $this->componentManager->getComponent(\Typoheads\Formhandler\View\FormView::class);
         $this->view->setLangFiles($this->langFiles);
@@ -1025,77 +934,6 @@ class FormController extends AbstractClass
             }
         }
         return new ComponentProcessResult();
-    }
-
-    /**
-     * Read stylesheet file(s) set in TypoScript. If set add to header data
-     */
-    protected function addCSS()
-    {
-        $cssFiles = $this->utilityFuncs->parseResourceFiles($this->settings, 'cssFile');
-        foreach ($cssFiles ?? [] as $idx => $fileOptions) {
-            $file = $fileOptions['file'];
-            if (strlen(trim($file)) > 0) {
-                $file = $this->utilityFuncs->resolveRelPath($file);
-                $pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
-                $pageRenderer->addCssFile(
-                    $file,
-                    $fileOptions['alternate'] ? 'alternate stylesheet' : 'stylesheet',
-                    $fileOptions['media'] ? $fileOptions['media'] : 'all',
-                    $fileOptions['title'] ? $fileOptions['title'] : '',
-                    empty($fileOptions['disableCompression']),
-                    $fileOptions['forceOnTop'] ? true : false,
-                    $fileOptions['allWrap'],
-                    $fileOptions['excludeFromConcatenation'] ? true : false
-                );
-            }
-        }
-    }
-
-    /**
-     * Read JavaScript file(s) set in TypoScript. If set add to header data
-     */
-    protected function addJS()
-    {
-        $jsFiles = $this->utilityFuncs->parseResourceFiles($this->settings, 'jsFile');
-        foreach ($jsFiles ?? [] as $idx => $fileOptions) {
-            $file = $fileOptions['file'];
-            if (strlen(trim($file)) > 0) {
-                $file = $this->utilityFuncs->resolveRelPath($file);
-                $pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
-                $pageRenderer->addJsFile(
-                    $file,
-                    $fileOptions['type'] ? $fileOptions['type'] : 'text/javascript',
-                    empty($fileOptions['disableCompression']),
-                    $fileOptions['forceOnTop'] ? true : false,
-                    $fileOptions['allWrap'],
-                    $fileOptions['excludeFromConcatenation'] ? true : false
-                );
-            }
-        }
-    }
-
-    /**
-     * Read JavaScript file(s) set in TypoScript. If set add to footer data
-     */
-    protected function addJSFooter()
-    {
-        $jsFiles = $this->utilityFuncs->parseResourceFiles($this->settings, 'jsFileFooter');
-        foreach ($jsFiles ?? [] as $idx => $fileOptions) {
-            $file = $fileOptions['file'];
-            if (strlen(trim($file)) > 0) {
-                $file = $this->utilityFuncs->resolveRelPath($file);
-                $pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
-                $pageRenderer->addJsFooterFile(
-                    $file,
-                    $fileOptions['type'] ? $fileOptions['type'] : 'text/javascript',
-                    empty($fileOptions['disableCompression']),
-                    $fileOptions['forceOnTop'] ? true : false,
-                    $fileOptions['allWrap'],
-                    $fileOptions['excludeFromConcatenation'] ? true : false
-                );
-            }
-        }
     }
 
     /**

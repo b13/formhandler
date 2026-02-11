@@ -7,6 +7,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\HttpUtility;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
+use TYPO3\CMS\Frontend\Page\PageInformation;
 use Typoheads\Formhandler\Component\AbstractClass;
 
 /*                                                                        *
@@ -93,12 +94,6 @@ class FormView extends AbstractClass
                 $this->replaceMarkersFromMaster();
                 $count++;
             }
-        }
-
-        if ($this->globals->getAjaxHandler()) {
-            $markers = [];
-            $this->globals->getAjaxHandler()->fillAjaxMarkers($markers);
-            $this->template = $this->templateService->substituteMarkerArray($this->template, $markers);
         }
 
         //fill Typoscript markers
@@ -413,17 +408,17 @@ class FormView extends AbstractClass
         if (isset($parameters['id'])) {
             unset($parameters['id']);
         }
-        if (isset($parameters['eID'])) {
-            unset($parameters['eID']);
-        }
         if (isset($parameters['randomID'])) {
             unset($parameters['randomID']);
         }
 
+        /** @var PageInformation $pageInformation */
+        $pageInformation = $this->request->getAttribute('frontend.page.information');
+
         try {
-            $path = $this->pi_getPageLink($GLOBALS['TSFE']->id, '', $parameters);
+            $path = $this->pi_getPageLink($pageInformation->getId(), '', $parameters);
         } catch (\OutOfRangeException $e) {
-            $path = $this->pi_getPageLink($GLOBALS['TSFE']->id);
+            $path = $this->pi_getPageLink($pageInformation->getId());
         }
 
         $path = preg_replace('/ADMCMD_[^=]+=[^&]+(&)?/', '', $path);
@@ -449,7 +444,7 @@ class FormView extends AbstractClass
             $name = $this->globals->getFormValuesPrefix() . '[submitted]';
         }
         $markers['###HIDDEN_FIELDS###'] = '
-			<input type="hidden" name="id" value="' . $GLOBALS['TSFE']->id . '" />
+			<input type="hidden" name="id" value="' . $pageInformation->getId() . '" />
 			<input type="hidden" name="' . htmlspecialchars($name) . '" value="1" />
 		';
 
@@ -534,7 +529,7 @@ class FormView extends AbstractClass
         $markers['###ip###'] = GeneralUtility::getIndpEnv('REMOTE_ADDR');
         $markers['###IP###'] = $markers['###ip###'];
         $markers['###submission_date###'] = date('d.m.Y H:i:s', time());
-        $markers['###pid###'] = $GLOBALS['TSFE']->id;
+        $markers['###pid###'] = $pageInformation->getId();
         $markers['###PID###'] = $markers['###pid###'];
 
         // current step
@@ -624,7 +619,7 @@ class FormView extends AbstractClass
     }
 
     /**
-     * Fills the markers ###FEUSER_[property]### with the data from $GLOBALS["TSFE"]->fe_user->user.
+     * Fills the markers ###FEUSER_[property]###
      *
      * @param array &$markers Reference to the markers array
      */
@@ -780,38 +775,6 @@ class FormView extends AbstractClass
                         $text = 'X';
                     }
                     $link = '';
-                    $uploadedFileName = $fileInfo['uploaded_name'];
-                    if (!$uploadedFileName) {
-                        $uploadedFileName = $fileInfo['name'];
-                    }
-                    if ($this->globals->getAjaxHandler() && isset($settings['files.']['enableAjaxFileRemoval'])) {
-                        $link = $this->globals->getAjaxHandler()->getFileRemovalLink($text, $field, $uploadedFileName);
-                    } elseif (isset($settings['files.']['enableFileRemoval'])) {
-                        $submitName = 'step-' . $this->globals->getSession()->get('currentStep') . '-reload';
-                        if ($this->globals->getFormValuesPrefix()) {
-                            $submitName = $this->globals->getFormValuesPrefix() . '[' . $submitName . ']';
-                        }
-                        $onClick = "
-							document.getElementById('removeFile-" . $this->globals->getRandomID() . "').value='" . $uploadedFileName . "';
-							document.getElementById('removeFileField-" . $this->globals->getRandomID() . "').value='" . $field . "';
-							document.getElementById('submitField-" . $this->globals->getRandomID() . "').name='" . $submitName . "';
-							document.getElementById('ieHiddenField-" . $this->globals->getRandomID() . "').name='dummy';
-						";
-
-                        if ($this->globals->getFormID()) {
-                            $onClick .= "document.getElementById('" . $this->globals->getFormID() . "').submit();";
-                        } else {
-                            $onClick .= 'document.forms[0].submit();';
-                        }
-
-                        $onClick .= 'return false;';
-
-                        $link = '<a
-								href="javascript:void(0)"
-								class="formhandler_removelink"
-								onclick="' . str_replace(["\n", '	'], '', $onClick) . '"
-								>' . $text . '</a>';
-                    }
                     $stdWrappedFilename = $this->utilityFuncs->wrap($filename, $this->settings['singleFileMarkerTemplate.'] ?? '', 'filenameWrap');
 
                     $wrappedFilename = $this->utilityFuncs->wrap($stdWrappedFilename . $link, $settings['singleFileMarkerTemplate.'] ?? '', 'singleWrap');
@@ -993,8 +956,6 @@ class FormView extends AbstractClass
                     }
                     $errorMessage = (string)$this->utilityFuncs->wrap($errorMessage, $this->settings['singleErrorTemplate.'], 'singleWrap');
                     $errorMessages[] = $errorMessage;
-                } else {
-                    $this->utilityFuncs->debugMessage('no_error_message', ['error_' . $field . '_' . $type], 2);
                 }
             }
             $errorMessage = implode('', $errorMessages);
@@ -1010,9 +971,6 @@ class FormView extends AbstractClass
             $errorMessage = $clearErrorMessage;
             if ($this->settings['addErrorAnchors'] ?? false) {
                 $baseUrl = GeneralUtility::getIndpEnv('REQUEST_URI');
-                if ($this->globals->isAjaxMode()) {
-                    $baseUrl = GeneralUtility::getIndpEnv('HTTP_REFERER');
-                }
                 $errorMessage = '<a href="' . $baseUrl . '#' . $field . '-' . $this->globals->getRandomID() . '">' . $errorMessage . '</a>';
             }
 

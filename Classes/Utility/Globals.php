@@ -22,10 +22,7 @@ use TYPO3\CMS\Core\SingletonInterface;
  */
 class Globals implements SingletonInterface
 {
-    protected static $ajaxHandler;
-    protected static $ajaxMode;
     protected static $cObj;
-    protected static $debuggers;
     protected static $formID;
     protected static $formValuesPrefix;
     protected static $gp;
@@ -50,37 +47,9 @@ class Globals implements SingletonInterface
         return self::$request;
     }
 
-    public static function setAjaxMode($mode): void
-    {
-        self::$ajaxMode = $mode;
-    }
-
-    public static function isAjaxMode()
-    {
-        return self::$ajaxMode;
-    }
-
-    public static function setAjaxHandler($ajaxHandler): void
-    {
-        self::$ajaxHandler = $ajaxHandler;
-    }
-
     public static function setCObj($cObj): void
     {
         self::$cObj = $cObj;
-    }
-
-    public static function setDebuggers($debuggers): void
-    {
-        self::$debuggers = $debuggers;
-    }
-
-    public static function addDebugger($debugger): void
-    {
-        if (!is_array(self::$debuggers)) {
-            self::$debuggers = [];
-        }
-        self::$debuggers[] = $debugger;
     }
 
     public static function setFormID($formID): void
@@ -143,22 +112,9 @@ class Globals implements SingletonInterface
         self::$templateSuffix = $templateSuffix;
     }
 
-    public static function getAjaxHandler()
-    {
-        return self::$ajaxHandler;
-    }
-
     public static function getCObj()
     {
         return self::$cObj;
-    }
-
-    public static function getDebuggers()
-    {
-        if (!is_array(self::$debuggers)) {
-            self::$debuggers = [];
-        }
-        return self::$debuggers;
     }
 
     public static function getFormID()

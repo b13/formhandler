@@ -9,8 +9,6 @@ services:
     exclude:
       - '../Classes/Domain/Model/*'
       - '../Classes/Utility/*'
-      - '../Classes/Ajax/*'
-      - '../Classes/Http/*'
 
   Typoheads\Formhandler\Utility\TcaSiteLanguagesProcFunc:
     public: true

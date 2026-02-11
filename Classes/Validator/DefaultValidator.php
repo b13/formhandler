@@ -173,9 +173,6 @@ class DefaultValidator extends AbstractValidator
         //foreach configured form field
         foreach ($fieldConf as $key => $fieldSettings) {
             $fieldName = trim($key, '.');
-            if (!array_key_exists($fieldName, $gp)) {
-                $this->utilityFuncs->debugMessage('missing_field_for_error_check', [$fieldName], 2);
-            }
 
             $errorFieldName = ($rootField === null) ? $fieldName : $rootField;
 
@@ -237,11 +234,7 @@ class DefaultValidator extends AbstractValidator
                     $errorCheckObject = $this->componentManager->getComponent($check['check']);
                     $fullClassName = $check['check'];
                 }
-                if (!$errorCheckObject) {
-                    $this->utilityFuncs->debugMessage('check_not_found', [$fullClassName], 2);
-                }
                 if (empty($this->restrictErrorChecks) || in_array($check['check'], $this->restrictErrorChecks)) {
-                    $this->utilityFuncs->debugMessage('calling_class', [$fullClassName]);
                     $errorCheckObject->init($gp, $check);
                     $errorCheckObject->setFormFieldName($fieldName);
                     if ($errorCheckObject->validateConfig()) {
@@ -255,8 +248,6 @@ class DefaultValidator extends AbstractValidator
                     } else {
                         $this->utilityFuncs->throwException('Configuration is not valid for class "' . $fullClassName . '"!');
                     }
-                } else {
-                    $this->utilityFuncs->debugMessage('check_skipped', [$check['check']]);
                 }
             }
         }

@@ -71,8 +71,6 @@ class ClearTempFiles extends AbstractPreProcessor
             //read files in directory
             $tmpFiles = GeneralUtility::getFilesInDir($path);
 
-            $this->utilityFuncs->debugMessage('cleaning_temp_files', [$path]);
-
             //calculate threshold timestamp
             $threshold = $this->utilityFuncs->getTimestamp($olderThanValue, $olderThanUnit);
 
@@ -88,7 +86,6 @@ class ClearTempFiles extends AbstractPreProcessor
 
                 if ($creationTime < $threshold) {
                     unlink($path . $file);
-                    $this->utilityFuncs->debugMessage('deleting_file', [$file]);
                 }
             }
         }

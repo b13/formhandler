@@ -6,8 +6,6 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\Schema\Struct\SelectItem;
 use TYPO3\CMS\Core\Site\SiteFinder;
-use TYPO3\CMS\Core\Utility\DebugUtility;
-use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /***************************************************************
@@ -37,66 +35,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class TcaUtility
 {
-    public function getParams($PA, $fobj)
-    {
-        $params = unserialize($PA['itemFormElValue']);
-        $output =
-            '<input
-			readonly="readonly" style="display:none"
-			name="' . $PA['itemFormElName'] . '"
-			value="' . htmlspecialchars($PA['itemFormElValue']) . '"
-			onchange="' . htmlspecialchars(implode('', $PA['fieldChangeFunc'])) . '"
-			' . $PA['onFocus'] . '/>
-		';
-        $output .= DebugUtility::viewArray($params);
-        return $output;
-    }
-
-    /**
-     * Adds onchange listener on the drop down menu "predefined".
-     * If the event is fired and old value was ".default", then empty some fields.
-     *
-     * @param array $config
-     * @return string the javascript
-     * @author Fabien Udriot
-     */
-    public function addFields_predefinedJS($config)
-    {
-        $newRecord = 'true';
-        /** @var ServerRequest $request */
-        $request = $GLOBALS['TYPO3_REQUEST'];
-        $editConf = $request->getQueryParams()['edit']['tt_content'];
-
-        if (is_array($editConf) && reset($editConf) === 'edit') {
-            $newRecord = 'false';
-        }
-
-        $uid = null;
-        if (is_array($editConf)) {
-            $uid = key($editConf);
-        }
-        if ($uid < 0 || empty($uid) || !strstr($uid, 'NEW')) {
-            $uid = $GLOBALS['SOBE']->elementsData[0]['uid'];
-        }
-
-        $js = "<script>\n";
-        $js .= "/*<![CDATA[*/\n";
-
-        $divId = $GLOBALS['SOBE']->tceforms->dynNestedStack[0][1];
-        if (!$divId) {
-            $divId = 'DIV.c-tablayer';
-        } else {
-            $divId .= '-DIV';
-        }
-        $js .= "var uid = '" . $uid . "'\n";
-        $js .= "var flexformBoxId = '" . $divId . "'\n";
-        $js .= 'var newRecord = ' . $newRecord . "\n";
-        $js .= file_get_contents(ExtensionManagementUtility::extPath('formhandler') . 'Resources/Public/JavaScript/addFields_predefinedJS.js');
-        $js .= "/*]]>*/\n";
-        $js .= "</script>\n";
-        return $js;
-    }
-
     /**
      * Sets the items for the "Predefined" dropdown.
      *

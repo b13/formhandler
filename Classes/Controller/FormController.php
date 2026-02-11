@@ -5,7 +5,6 @@ namespace Typoheads\Formhandler\Controller;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Http\ResponseFactory;
 use TYPO3\CMS\Core\Http\StreamFactory;
-use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Typoheads\Formhandler\Component\AbstractClass;
 use Typoheads\Formhandler\Component\AbstractComponent;
@@ -166,7 +165,6 @@ class FormController extends AbstractClass
 
             $this->storeGPinSession();
             $this->mergeGPWithSession();
-
 
             //if no more steps
             if ($this->finished) {
@@ -711,7 +709,7 @@ class FormController extends AbstractClass
 
     /**
      * Init method for the controller.
-     * This method sets internal values, initializes the ajax handler and the session.
+     * This method sets internal values, and initializes the session.
      */
     protected function init()
     {
@@ -749,19 +747,6 @@ class FormController extends AbstractClass
         $session->start();
         $this->globals->setSession($session);
 
-        $action = $this->request->getParsedBody()['action'] ?? $this->request->getQueryParams()['action'] ?? null;
-        if ($this->globals->getFormValuesPrefix()) {
-            $temp = $this->request->getParsedBody()[$this->globals->getFormValuesPrefix()] ?? $this->request->getQueryParams()[$this->globals->getFormValuesPrefix()] ?? null;
-            $action = $temp['action'] ?? null;
-        }
-        if ($this->globals->getSession()->get('finished') && !$action) {
-            $this->globals->getSession()->reset();
-            unset($_GET[$this->globals->getFormValuesPrefix()]);
-            unset($_GET['id']);
-            $this->utilityFuncs->doRedirect($GLOBALS['TSFE']->id, false, $_GET);
-            exit();
-        }
-
         $currentStepFromSession = $this->globals->getSession()->get('currentStep');
         $prevStep = $currentStepFromSession;
         if ((int)$prevStep !== (int)$currentStepFromSession) {
@@ -793,7 +778,6 @@ class FormController extends AbstractClass
                 $this->reset();
             }
         }
-
 
         $this->view = $this->componentManager->getComponent(\Typoheads\Formhandler\View\FormView::class);
         $this->view->setLangFiles($this->langFiles);

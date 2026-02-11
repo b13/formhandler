@@ -32,8 +32,8 @@ return [
             'exclude' => 1,
             'label' => 'LLL:EXT:formhandler/Resources/Private/Language/locallang_db.xlf:tx_formhandler_log.params',
             'config' => [
-                'type' => 'user',
-                'userFunc' => 'Typoheads\Formhandler\Utility\TcaUtility->getParams',
+                'type' => 'text',
+                'readOnly' => true,
             ],
         ],
         'is_spam' => [

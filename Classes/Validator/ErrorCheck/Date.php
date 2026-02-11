@@ -38,11 +38,9 @@ class Date extends AbstractErrorCheck
                 if ((isset($status['warning_count']) && (int)($status['warning_count']) > 0) ||
                     (isset($status['error_count']) && (int)($status['error_count']) > 0)) {
                     $checkFailed = $this->getCheckFailed();
-                    $this->utilityFuncs->debugMessage('Result:', [], 2, $status);
                 }
             } catch (\Exception $e) {
                 $checkFailed = $this->getCheckFailed();
-                $this->utilityFuncs->debugMessage($e->getMessage());
             }
         }
         return $checkFailed;

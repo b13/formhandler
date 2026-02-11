@@ -147,9 +147,6 @@ class Mail extends AbstractFinisher
         $view->setTemplate($templateCode, ('EMAIL_' . strtoupper($mode) . '_' . strtoupper($suffix) . $this->globals->getTemplateSuffix()));
         if (!$view->hasTemplate()) {
             $view->setTemplate($templateCode, ('EMAIL_' . strtoupper($mode) . '_' . strtoupper($suffix)));
-            if (!$view->hasTemplate()) {
-                $this->utilityFuncs->debugMessage('no_mail_template', [$mode, $suffix], 2);
-            }
         }
 
         return $view->render($this->gp, ['mode' => $mode, 'suffix' => $suffix]);
@@ -163,7 +160,6 @@ class Mail extends AbstractFinisher
     protected function sendMail($type)
     {
         if ((int)($this->utilityFuncs->getSingle($this->settings[$type], 'disable')) === 1) {
-            $this->utilityFuncs->debugMessage('mail_disabled', [$type]);
             return;
         }
 
@@ -278,7 +274,6 @@ class Mail extends AbstractFinisher
                 if ($tmphandle) {
                     fwrite($tmphandle, $template['html']);
                     fclose($tmphandle);
-                    $this->utilityFuncs->debugMessage('adding_html', [], 1, [$template['html']]);
                     $this->emailObj->addAttachment($tmphtml);
                 }
             } else {
@@ -292,13 +287,10 @@ class Mail extends AbstractFinisher
         foreach ($mailSettings['attachment'] ?? [] as $idx => $attachment) {
             if (strlen($attachment) > 0 && @file_exists($attachment)) {
                 $this->emailObj->addAttachment($attachment);
-            } else {
-                $this->utilityFuncs->debugMessage('attachment_not_found', [$attachment], 2);
             }
         }
         if (isset($mailSettings['attachGeneratedFiles'])) {
             $files = GeneralUtility::trimExplode(',', $mailSettings['attachGeneratedFiles']);
-            $this->utilityFuncs->debugMessage('adding_generated_files', [], 1, $files);
             foreach ($files as $file) {
                 $this->emailObj->addAttachment($file);
             }
@@ -324,16 +316,9 @@ class Mail extends AbstractFinisher
         if (!empty($recipients) && count($recipients) > $max) {
             $recipients = array_slice($recipients, 0, $max);
         }
-        $sent = false;
         if (!empty($recipients)) {
-            $sent = $this->emailObj->send($recipients);
+            $this->emailObj->send($recipients);
         }
-        if ($sent) {
-            $this->utilityFuncs->debugMessage('mail_sent', [implode(',', $recipients)]);
-        } else {
-            $this->utilityFuncs->debugMessage('mail_not_sent', [implode(',', $recipients)], 2);
-        }
-        $this->utilityFuncs->debugMailContent($this->emailObj);
         if (isset($tmphtml)) {
             unlink($tmphtml);
         }
@@ -437,7 +422,7 @@ class Mail extends AbstractFinisher
      * @param array $settings The settings array containing the mail settings
      * @param string $type admin|user
      * @param string $key The key to parse in the settings array
-     * @return string
+     * @return array
      */
     protected function parseFilesList($settings, $type, $key)
     {
@@ -459,8 +444,6 @@ class Mail extends AbstractFinisher
                 array_push($parsed, $file);
             } elseif (file_exists(GeneralUtility::getIndpEnv('TYPO3_DOCUMENT_ROOT') . '/' . $file)) {
                 array_push($parsed, GeneralUtility::getIndpEnv('TYPO3_DOCUMENT_ROOT') . '/' . $file);
-            } elseif (strlen($file) > 0) {
-                $this->utilityFuncs->debugMessage('attachment_not_found', [$file], 2);
             }
         }
         return $parsed;
@@ -485,8 +468,6 @@ class Mail extends AbstractFinisher
                         }
                         $embedFile = $this->utilityFuncs->sanitizePath($embedFile);
                         $cids[$key] = $this->emailObj->embed($embedFile);
-                    } else {
-                        $this->utilityFuncs->debugMessage('attachment_not_found', [$embedFile], 2);
                     }
                 }
             }

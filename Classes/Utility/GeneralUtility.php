@@ -43,7 +43,8 @@ class GeneralUtility implements SingletonInterface
 
     public static function getMergedGP()
     {
-        $gp = array_merge($GLOBALS['TYPO3_REQUEST']->getQueryParams(), $GLOBALS['TYPO3_REQUEST']->getParsedBody() ?? []);
+        $request = Globals::getRequest();
+        $gp = array_merge($request->getQueryParams(), $request->getParsedBody() ?? []);
         $prefix = Globals::getFormValuesPrefix();
         if ($prefix) {
             if (isset($gp[$prefix]) && is_array($gp[$prefix])) {
@@ -169,7 +170,7 @@ class GeneralUtility implements SingletonInterface
                 if (self::isTemplateFilePath($templateFile)) {
                     $templateFile = self::resolvePath($templateFile);
                     if (!@file_exists($templateFile)) {
-                        self::throwException('template_file_not_found', $templateFile);
+                        self::throwException('template_file_not_found ' . $templateFile);
                     }
                     $templateCode = \TYPO3\CMS\Core\Utility\GeneralUtility::getURL($templateFile);
                 } else {
@@ -180,7 +181,7 @@ class GeneralUtility implements SingletonInterface
             } else {
                 $templateFile = self::resolvePath($templateFile);
                 if (!@file_exists($templateFile)) {
-                    self::throwException('template_file_not_found', $templateFile);
+                    self::throwException('template_file_not_found ' . $templateFile);
                 }
                 $templateCode = \TYPO3\CMS\Core\Utility\GeneralUtility::getURL($templateFile);
             }
@@ -188,7 +189,7 @@ class GeneralUtility implements SingletonInterface
             if (self::isTemplateFilePath($templateFile)) {
                 $templateFile = self::resolvePath($templateFile);
                 if (!@file_exists($templateFile)) {
-                    self::throwException('template_file_not_found', $templateFile);
+                    self::throwException('template_file_not_found ' . $templateFile);
                 }
                 $templateCode = \TYPO3\CMS\Core\Utility\GeneralUtility::getURL($templateFile);
             } else {
@@ -197,10 +198,10 @@ class GeneralUtility implements SingletonInterface
             }
         }
         if (strlen($templateCode) === 0) {
-            self::throwException('empty_template_file', $templateFile);
+            self::throwException('empty_template_file' . $templateFile);
         }
         if (stristr($templateCode, '###TEMPLATE_') === false) {
-            self::throwException('invalid_template_file', $templateFile);
+            self::throwException('invalid_template_file ' . $templateFile);
         }
         return $templateCode;
     }
@@ -531,67 +532,12 @@ class GeneralUtility implements SingletonInterface
     }
 
     /**
-     * Method to log a debug message.
-     * The message will be handled by one or more configured "Debuggers".
-     *
-     * @param string $key The message or key in language file (locallang_debug.xlf)
-     * @param array $printfArgs If the messsage contains placeholders for usage with printf, pass the replacement values in this array.
-     * @param int $severity The severity of the message. Valid values are 1,2 and 3 (1= info, 2 = warning, 3 = error)
-     * @param array $data Additional debug data (e.g. the array of GET/POST values)
-     */
-    public static function debugMessage($key, array $printfArgs = [], $severity = 1, array $data = []): void
-    {
-        $severity = (int)$severity;
-        $message = self::getDebugMessage($key);
-        if (strlen($message) == 0) {
-            $message = $key;
-        } elseif (count($printfArgs) > 0) {
-            $message = vsprintf($message, $printfArgs);
-        }
-        $data = self::recursiveHtmlSpecialChars($data);
-        foreach (Globals::getDebuggers() as $idx => $debugger) {
-            $debugger->addToDebugLog(htmlspecialchars($message), $severity, $data);
-        }
-    }
-
-    public static function debugMailContent($emailObj): void
-    {
-        self::debugMessage('mail_subject', [$emailObj->getSubject()]);
-
-        $sender = $emailObj->getSender();
-        if (!is_array($sender)) {
-            $sender = [$sender];
-        }
-        self::debugMessage('mail_sender', [], 1, $sender);
-
-        $replyTo = $emailObj->getReplyTo();
-        if (!is_array($replyTo)) {
-            $replyTo = [$replyTo];
-        }
-        self::debugMessage('mail_replyto', [], 1, $replyTo);
-
-        self::debugMessage('mail_cc', [], 1, (array)$emailObj->getCc());
-        self::debugMessage('mail_bcc', [], 1, (array)$emailObj->getBcc());
-        self::debugMessage('mail_plain', [], 1, [$emailObj->getPlain()]);
-        self::debugMessage('mail_html', [], 1, [$emailObj->getHTML()]);
-    }
-
-    /**
      * Manages the exception throwing
      *
-     * @param string $key Key in language file
+     * @param string $message Key in language file
      */
-    public static function throwException($key): void
+    public static function throwException($message): void
     {
-        $message = self::getExceptionMessage($key);
-        if (strlen($message) == 0) {
-            throw new \Exception($key, 3319345663);
-        }
-        if (func_num_args() > 1) {
-            $args = func_get_args();
-            array_shift($args);
-            $message = vsprintf($message, $args);
-        }
         throw new \Exception($message, 7962204351);
     }
 
@@ -696,7 +642,6 @@ class GeneralUtility implements SingletonInterface
 
         //if the set directory doesn't exist, print a message and try to create
         if (!is_dir(self::getTYPO3Root() . $uploadFolder)) {
-            self::debugMessage('folder_doesnt_exist', [self::getTYPO3Root() . '/' . $uploadFolder], 2);
             \TYPO3\CMS\Core\Utility\GeneralUtility::mkdir_deep(self::getTYPO3Root() . '/' . $uploadFolder);
         }
         return $uploadFolder;
@@ -797,47 +742,6 @@ class GeneralUtility implements SingletonInterface
             \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(Random::class)->generateRandomBytes(10)
         );
         return $randomID;
-    }
-
-    public static function initializeTSFE($pid): void
-    {
-        $request = $GLOBALS['TYPO3_REQUEST'];
-        // create object instances:
-        $GLOBALS['TSFE'] = $request->getAttribute('frontend.controller');
-        $GLOBALS['TSFE']->tmpl = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\CMS\Core\TypoScript\TemplateService');
-        $GLOBALS['TSFE']->tmpl->init();
-        $GLOBALS['TSFE']->fe_user->fetchGroupData();
-
-        // Get the page
-        $GLOBALS['TSFE']->fetch_the_id();
-        $GLOBALS['TSFE']->getConfigArray();
-        if (is_array($GLOBALS['TYPO3_REQUEST']->getAttribute('frontend.typoscript')->getSetupArray()['includeLibs.'])) {
-            $GLOBALS['TSFE']->includeLibraries($GLOBALS['TYPO3_REQUEST']->getAttribute('frontend.typoscript')->getSetupArray()['includeLibs.']);
-        }
-        $GLOBALS['TSFE']->settingLanguage();
-        $GLOBALS['TSFE']->newCObj();
-    }
-
-    /**
-     * Returns a debug message according to given key
-     *
-     * @param string The key in translation file
-     * @return string
-     */
-    public static function getDebugMessage($key)
-    {
-        return trim($GLOBALS['TSFE']->sL('LLL:EXT:formhandler/Resources/Private/Language/locallang_debug.xlf:' . $key));
-    }
-
-    /**
-     * Returns an exception message according to given key
-     *
-     * @param string The key in translation file
-     * @return string
-     */
-    public static function getExceptionMessage($key)
-    {
-        return trim($GLOBALS['TSFE']->sL('LLL:EXT:formhandler/Resources/Private/Language/locallang_exceptions.xlf:' . $key));
     }
 
     /**

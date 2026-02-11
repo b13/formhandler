@@ -113,10 +113,6 @@ class DB extends AbstractComponent
         $this->globals->getSession()->setMultiple($sessionValues);
         $this->gp['inserted_uid'] = $insertedUID;
         $this->gp[$table . '_inserted_uid'] = $this->gp['inserted_uid'];
-
-        if ((int)($this->utilityFuncs->getSingle($this->settings, 'nodebug')) !== 1) {
-            $this->utilityFuncs->debugMessage('logging', [$table, implode(',', $fields)]);
-        }
         return new ComponentProcessResult(null, $this->gp);
     }
 

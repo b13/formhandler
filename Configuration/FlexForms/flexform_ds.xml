@@ -59,18 +59,6 @@
                             </config>
 
                     </predefined>
-                    <predefinedJS>
-
-                            <config>
-                                <type>select</type>
-                                <renderType>selectSingle</renderType>
-                                <userFunc>Typoheads\Formhandler\Utility\TcaUtility->addFields_predefinedJS</userFunc>
-                                <maxitems>1</maxitems>
-                                <size>1</size>
-                                <multiple>0</multiple>
-                            </config>
-
-                    </predefinedJS>
                 </el>
             </ROOT>
         </sDEF>

@@ -71,7 +71,7 @@ class TcaUtility
         }
 
         $site = GeneralUtility::makeInstance(SiteFinder::class)->getSiteByPageId($pid);
-        $sitePredefinedForms = $site->getSettings()->getAll()['formhandler']['forms'];
+        $sitePredefinedForms = $site->getSettings()->getAll()['formhandler']['forms'] ?? [];
 
         if (!$sitePredefinedForms) {
             $config['items'] = [

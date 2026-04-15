@@ -6,7 +6,6 @@ use ParseCsv\Csv;
 use TYPO3\CMS\Core\Http\ResponseFactory;
 use TYPO3\CMS\Core\Http\StreamFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use Typoheads\Formhandler\Component\AbstractComponent;
 use Typoheads\Formhandler\Component\ComponentProcessResult;
 
 /*                                                                        *
@@ -25,35 +24,21 @@ use Typoheads\Formhandler\Component\ComponentProcessResult;
  * Class to generate CSV files in Backend
  * @uses export2CSV in csv.lib.php
  */
-class BackendCsv extends AbstractComponent
+class BackendCsv
 {
     protected ?Csv $csv = null;
+    protected array $settings = [];
 
-    public function init($gp, $settings): void
+    public function init($settings): void
     {
-        parent::init($gp, $settings);
-        $fileName = $this->utilityFuncs->getSingle($this->settings, 'fileName');
-        if (!$fileName) {
-            $fileName = 'formhandler.csv';
-        }
+        $this->settings = $settings;
+        $fileName = 'formhandler.csv';
         $this->settings['fileName'] = $fileName;
-
-        $delimiter = $this->utilityFuncs->getSingle($this->settings, 'delimiter');
-        if (!$delimiter) {
-            $delimiter = ',';
-        }
+        $delimiter = ',';
         $this->settings['delimiter'] = $delimiter;
-
-        $enclosure = $this->utilityFuncs->getSingle($this->settings, 'enclosure');
-        if (!$enclosure) {
-            $enclosure = '"';
-        }
+        $enclosure = '"';
         $this->settings['enclosure'] = $enclosure;
-
-        $encoding = $this->utilityFuncs->getSingle($this->settings, 'encoding');
-        if (!$encoding) {
-            $encoding = 'utf-8';
-        }
+        $encoding = 'utf-8';
         $this->settings['encoding'] = $encoding;
     }
 

@@ -47,7 +47,7 @@ class Dispatcher extends AbstractPlugin
      */
     protected $utilityFuncs;
 
-    public function main(): ResponseInterface
+    public function main(array $settings): ResponseInterface
     {
         $this->componentManager = GeneralUtility::makeInstance(Manager::class);
         $this->globals = GeneralUtility::makeInstance(Globals::class);
@@ -87,7 +87,7 @@ class Dispatcher extends AbstractPlugin
             $controller->setPredefined($predef);
         }
 
-        $result = $controller->process();
+        $result = $controller->process($settings);
         return $result;
     }
 }

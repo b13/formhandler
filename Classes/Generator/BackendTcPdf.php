@@ -5,7 +5,6 @@ namespace Typoheads\Formhandler\Generator;
 use TYPO3\CMS\Core\Http\ResponseFactory;
 use TYPO3\CMS\Core\Http\StreamFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use Typoheads\Formhandler\Component\AbstractComponent;
 use Typoheads\Formhandler\Component\ComponentProcessResult;
 use Typoheads\Formhandler\Utility\TemplateTCPDF;
 
@@ -25,41 +24,23 @@ use Typoheads\Formhandler\Utility\TemplateTCPDF;
  * Class to generate PDF files in Backend
  * @uses Tx_Formhandler_Template_TCPDF
  */
-class BackendTcPdf extends AbstractComponent
+class BackendTcPdf
 {
     protected ?TemplateTCPDF $pdf = null;
+    protected array $settings = [];
 
-    public function init($gp, $settings): void
+    public function init(array $settings): void
     {
-        parent::init($gp, $settings);
-        $fileName = $this->utilityFuncs->getSingle($this->settings, 'fileName');
-        if (!$fileName) {
-            $fileName = 'formhandler.pdf';
-        }
+        $this->settings = $settings;
+        $fileName = 'formhandler.pdf';
         $this->settings['fileName'] = $fileName;
-
-        $fontSize = $this->utilityFuncs->getSingle($this->settings, 'fontSize');
-        if (!$fontSize) {
-            $fontSize = 12;
-        }
+        $fontSize = 12;
         $this->settings['fontSize'] = $fontSize;
-
-        $fontSizeHeader = $this->utilityFuncs->getSingle($this->settings, 'fontSizeHeader');
-        if (!$fontSizeHeader) {
-            $fontSizeHeader = 8;
-        }
+        $fontSizeHeader = 8;
         $this->settings['fontSizeHeader'] = $fontSizeHeader;
-
-        $fontSizeFooter = $this->utilityFuncs->getSingle($this->settings, 'fontSizeFooter');
-        if (!$fontSizeFooter) {
-            $fontSizeFooter = 8;
-        }
+        $fontSizeFooter = 8;
         $this->settings['fontSizeFooter'] = $fontSizeFooter;
-
-        $font = $this->utilityFuncs->getSingle($this->settings, 'font');
-        if (!$font) {
-            $font = 'FreeSans';
-        }
+        $font = 'FreeSans';
         $this->settings['font'] = $font;
     }
 
@@ -69,7 +50,7 @@ class BackendTcPdf extends AbstractComponent
         $exportFields = $this->settings['exportFields'];
 
         //init pdf object
-        $this->pdf = $this->componentManager->getComponent(TemplateTCPDF::class);
+        $this->pdf = new TemplateTCPDF();
         $this->pdf->SetAutoPageBreak(true, PDF_MARGIN_BOTTOM);
 
         $this->pdf->SetFont($this->settings['font'], '', $this->settings['fontSize']);

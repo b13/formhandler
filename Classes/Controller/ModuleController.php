@@ -38,7 +38,6 @@ class ModuleController extends ActionController
     protected array $gp;
     protected int $id = 0;
     protected ModuleTemplate $moduleTemplate;
-    protected \Typoheads\Formhandler\Utility\GeneralUtility $utilityFuncs;
 
     public function __construct(
         protected ModuleTemplateFactory $moduleTemplateFactory,
@@ -48,7 +47,6 @@ class ModuleController extends ActionController
         protected Manager $componentManager,
         protected SiteFinder $siteFinder
     ) {
-        $this->utilityFuncs = GeneralUtility::makeInstance(\Typoheads\Formhandler\Utility\GeneralUtility::class);
     }
 
     public function initializeAction(): void
@@ -223,19 +221,18 @@ class ModuleController extends ActionController
                 ];
             }
             if ($filetype === 'pdf') {
-                /** @var BackendTcPdf $generator */
-                $generator = $this->componentManager->getComponent(BackendTcPdf::class);
+                $generator = new BackendTcPdf();
                 $this->settings['pdf']['config']['records'] = $convertedLogDataRows;
                 $this->settings['pdf']['config']['exportFields'] = $fields;
-                $generator->init([], $this->settings['pdf']['config']);
+                $generator->init($this->settings['pdf']['config']);
                 $result = $generator->process();
                 return $result->response;
             }
             if ($filetype === 'csv') {
-                $generator = $this->componentManager->getComponent(BackendCsv::class);
+                $generator = new BackendCsv();
                 $this->settings['csv']['config']['records'] = $convertedLogDataRows;
                 $this->settings['csv']['config']['exportFields'] = $fields;
-                $generator->init([], $this->settings['csv']['config']);
+                $generator->init($this->settings['csv']['config']);
                 $result = $generator->process();
                 return $result->response;
             }

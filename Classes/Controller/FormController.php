@@ -48,6 +48,7 @@ class FormController extends AbstractClass
     protected ?Configuration $configuration = null;
     protected ResponseFactory $responseFactory;
     protected StreamFactory $streamFactory;
+    protected array $processSettings = [];
 
     public function __construct()
     {
@@ -57,8 +58,9 @@ class FormController extends AbstractClass
 
     }
 
-    public function process(): ResponseInterface
+    public function process(array $settings): ResponseInterface
     {
+        $this->processSettings = $settings;
         $this->init();
         $this->storeFileNamesInGP();
         $this->processFileRemoval();
@@ -973,6 +975,7 @@ class FormController extends AbstractClass
             unset($settings['predef.']);
             $settings = $this->utilityFuncs->mergeConfiguration($settings, $predefSettings);
         }
+        $settings = $this->utilityFuncs->mergeConfiguration($settings, $this->processSettings);
         return $settings;
     }
 }

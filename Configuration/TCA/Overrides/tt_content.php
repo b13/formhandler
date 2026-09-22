@@ -21,9 +21,4 @@ $GLOBALS['TCA']['tt_content']['types']['formhandler_pi1']['showitem'] = '
 --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.behaviour,
 --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.extended';
 
-$GLOBALS['TCA']['tt_content']['types']['list']['subtypes_addlist']['formhandler_pi1'] = 'pi_flexform';
-\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addPiFlexFormValue(
-    '*',
-    'FILE:EXT:formhandler/Configuration/FlexForms/flexform_ds.xml',
-    'formhandler_pi1'
-);
+$GLOBALS['TCA']['tt_content']['types']['formhandler_pi1']['columnsOverrides']['pi_flexform']['config']['ds'] = 'FILE:EXT:formhandler/Configuration/FlexForms/flexform_ds.xml';

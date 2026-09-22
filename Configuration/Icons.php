@@ -7,4 +7,8 @@ return [
         'provider' => \TYPO3\CMS\Core\Imaging\IconProvider\BitmapIconProvider::class,
         'source' => 'EXT:formhandler/Resources/Public/Images/pagetreeicon.png',
     ],
+    'formhandlerElement' => [
+        'provider' => \TYPO3\CMS\Core\Imaging\IconProvider\BitmapIconProvider::class,
+        'source' => 'EXT:formhandler/Resources/Public/Icons/Extension.gif',
+    ],
 ];

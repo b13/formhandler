@@ -11,7 +11,6 @@ call_user_func(
             'Pi1',
             [\Typoheads\Formhandler\Controller\FormhandlerPluginController::class => 'index'],
             [\Typoheads\Formhandler\Controller\FormhandlerPluginController::class => 'index'],
-            \TYPO3\CMS\Extbase\Utility\ExtensionUtility::PLUGIN_TYPE_CONTENT_ELEMENT
         );
     }
 );

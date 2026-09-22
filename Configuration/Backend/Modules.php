@@ -4,7 +4,7 @@ return [
     'web_FormhandlerLog' => [
         'parent' => 'web',
         'access' => 'user',
-        'iconIdentifier' => null,
+        'iconIdentifier' => 'formhandlerElement',
         'labels' => 'LLL:EXT:formhandler/Resources/Private/Language/locallang_mod.xlf',
         'extensionName' => 'Formhandler',
         'controllerActions' => [

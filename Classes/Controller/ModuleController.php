@@ -77,9 +77,6 @@ class ModuleController extends ActionController
         }
     }
 
-    /**
-     * Displays log data
-     */
     public function indexAction(?Demand $demand = null, ?int $page = null): ResponseInterface
     {
         if ($demand === null) {
@@ -198,13 +195,7 @@ class ModuleController extends ActionController
         return $this->moduleTemplate->renderResponse('Module/SelectFields');
     }
 
-    /**
-     * Exports given rows as file
-     * @param string uids to export
-     * @param array fields to export
-     * @param string export file type (PDF || CSV)
-     */
-    public function exportAction($logDataUids = null, array $fields = [], $filetype = ''): ResponseInterface
+    public function exportAction(?string $logDataUids = null, array $fields = [], string $filetype = ''): ResponseInterface
     {
         if ($logDataUids !== null && !empty($fields)) {
             $logDataRows = $this->logDataRepository->findByUids($logDataUids);

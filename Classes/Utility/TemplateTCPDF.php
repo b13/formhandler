@@ -97,8 +97,7 @@ class TemplateTCPDF extends \TCPDF
     private function getLL($key)
     {
         $languageService = $this->getLanguageService();
-        $languageService->includeLLFile($this->sysLangFile);
-        $text = trim($languageService->sL($key));
+        $text = trim($languageService->sL('LLL:' . $this->sysLangFile . ':' . $key));
         return $text;
     }
 

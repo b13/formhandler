@@ -11,6 +11,7 @@ use Typoheads\Formhandler\Component\AbstractComponent;
 use Typoheads\Formhandler\Component\ComponentProcessResult;
 use Typoheads\Formhandler\Component\Configuration;
 use Typoheads\Formhandler\Interceptor\RemoveXSS;
+use Typoheads\Formhandler\Validator\DefaultValidator;
 
 /*                                                                        *
  * This script is part of the TYPO3 project - inspiring people to share!  *
@@ -116,6 +117,7 @@ class FormController extends AbstractClass
                     $className = $this->utilityFuncs->getPreparedClassName($tsConfig);
                     if (is_array($tsConfig) && strlen($className) > 0) {
                         if ((int)($this->utilityFuncs->getSingle($tsConfig, 'disable')) !== 1) {
+                            /** @var DefaultValidator $validator */
                             $validator = $this->componentManager->getComponent($className);
                             if ($this->currentStep === $this->lastStep) {
                                 $userSetting = GeneralUtility::trimExplode(',', (string)$this->utilityFuncs->getSingle($tsConfig['config.'], 'restrictErrorChecks'));

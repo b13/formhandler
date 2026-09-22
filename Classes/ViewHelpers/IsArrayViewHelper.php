@@ -19,14 +19,7 @@ use TYPO3Fluid\Fluid\ViewHelpers\IfViewHelper;
  */
 class IsArrayViewHelper extends IfViewHelper
 {
-    /**
-     * Renders <f:then> child if $condition is true, otherwise renders <f:else> child.
-     *
-     * @param array $arguments
-     * @param RenderingContextInterface $renderingContext
-     * @return bool
-     */
-    public static function verdict(array $arguments, RenderingContextInterface $renderingContext)
+    public static function verdict(array $arguments, RenderingContextInterface $renderingContext): bool
     {
         return isset($arguments['condition']) && is_array($arguments['condition']);
     }

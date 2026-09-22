@@ -8,7 +8,7 @@ return [
         'labels' => 'LLL:EXT:formhandler/Resources/Private/Language/locallang_mod.xlf',
         'extensionName' => 'Formhandler',
         'controllerActions' => [
-            'Typoheads\Formhandler\Controller\ModuleController' => [
+            \Typoheads\Formhandler\Controller\ModuleController::class => [
                 'index',
                 'view',
                 'selectFields',

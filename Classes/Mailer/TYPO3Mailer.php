@@ -21,17 +21,14 @@ use Typoheads\Formhandler\Component\ComponentProcessResult;
 
 class TYPO3Mailer extends AbstractComponent implements MailerInterface
 {
-    /**
-     * The TYPO3 mail message object
-     *
-     * @var MailMessage
-     */
-    protected $emailObj;
+    protected MailMessage $emailObj;
+    protected \TYPO3\CMS\Core\Mail\MailerInterface $mailer;
 
     public function __construct()
     {
         parent::__construct();
         $this->emailObj = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(MailMessage::class);
+        $this->mailer = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Mail\MailerInterface::class);
     }
 
     public function process(): ComponentProcessResult
@@ -47,9 +44,9 @@ class TYPO3Mailer extends AbstractComponent implements MailerInterface
         if (!empty($recipients)) {
             $this->emailObj->setTo($recipients);
 
-            $numberOfEmailsSent = $this->emailObj->send();
+            $this->mailer->send($this->emailObj);
 
-            if ($numberOfEmailsSent) {
+            if ($this->mailer->getSentMessage() !== null) {
                 return true;
             }
         }
